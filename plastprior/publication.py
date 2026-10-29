@@ -128,6 +128,8 @@ def write_publication(db, directory, run_id):
             'readme': _readme(run_id, n),
         }
         detail.executemany('INSERT INTO metadata VALUES (?,?)', detail_metadata.items())
+        from .figure_evidence import add_fig4
+        figure_summary = add_fig4(detail, csv_path)
         detail.commit()
         if detail.execute('PRAGMA integrity_check').fetchall() != [('ok',)]:
             raise ValueError('Dashboard detail database integrity failed.')
@@ -163,6 +165,7 @@ def write_publication(db, directory, run_id):
     summary = {
         'format': FORMAT, 'schema_version': 1, 'run_id': run_id, 'rows': n,
         'chemical_families': family_summary,
+        'figure4': figure_summary,
         'source_details': source_summary,
         'columns': len(FIELDS), 'csv_sha256': _hash(csv_path),
         'dictionary_sha256': _hash(dictionary_path),

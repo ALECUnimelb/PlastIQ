@@ -112,6 +112,8 @@ def refresh_browser_projection(archive_path, csv_path, database_path, destinatio
         summary = add_source_details(archive, detail)
         detail.execute('INSERT OR REPLACE INTO metadata VALUES (?,?)', ('source_details', json.dumps(summary)))
         detail.execute('UPDATE metadata SET value=? WHERE key=?', (SCOPE, 'scope'))
+        from .figure_evidence import add_fig4
+        add_fig4(detail, output_csv)
         detail.commit()
         detail.execute('VACUUM')
         if detail.execute('PRAGMA integrity_check').fetchall() != [('ok',)]:

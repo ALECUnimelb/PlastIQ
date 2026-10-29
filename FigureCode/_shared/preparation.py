@@ -118,5 +118,8 @@ def prepare(names, *, check_existing=False, install=True):
                 shutil.copytree(temp/name/'source_data',destination)
                 meta=stage/preparation_path(name).relative_to(RESULT)
                 meta.unlink(missing_ok=True);write_json(meta,record)
+            if 'Fig4' in records:
+                from plastprior.figure_evidence import package_fig4
+                package_fig4(stage)
             replace_directory(stage,RESULT)
     return records

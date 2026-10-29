@@ -94,6 +94,8 @@ def export_scenario(source, output, policy=None):
                         'base_run_id':meta['run_id'], 'scenario_provenance':json.dumps(provenance),
                         'readme':'H/E weighted sums rounded half up separately. Priority=sum of rounded H/E. Labels: L<4, M<8, H<12, otherwise vH. Original evidence preserved; weighted sums retained as *_score_raw.'}
             db.executemany('INSERT OR REPLACE INTO metadata VALUES (?,?)', new_meta.items())
+            from .figure_evidence import add_fig4
+            add_fig4(db, csv_path)
             for field in derived_fields:
                 spec = {'field':field,'source_field':field,'definition':'Derived by '+policy['policy_version']+'; see scoring_config_json and scenario_provenance.'}
                 db.execute('INSERT OR REPLACE INTO data_dictionary VALUES (?,?)',(field,json.dumps(spec)))

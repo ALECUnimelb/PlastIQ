@@ -217,3 +217,22 @@ These tests use local fixtures and do not require the research collection.
 They do not replace a full frozen-input run. Exact field comparisons, input
 fingerprints, execution records and the separate historical regression scope
 are described in the [reproduction guide](docs/reproduction.md#verification).
+
+### Dashboard Fig. 4 evidence
+
+The browser projection automatically includes verified Fig. 4 composition when
+`result/figure_data/Fig4/` has prepared annotations for the exact exported CSV.
+All 101 baseline members, source hashes, labels, category order and three count
+tables travel in `publication_figures` alongside other figures. Preparing Fig. 4
+also refreshes the paired dashboard database in the coordinated result swap.
+New datasets must have matching Fig. 4 annotations prepared first; stale article
+annotations are never silently reused. No scoring or ranking is changed.
+
+To package existing prepared data without recalculating or rendering figures:
+
+```sh
+.venv/bin/python -m plastprior.figure_evidence result
+```
+
+Users then import the original `PlastPrior_results.csv` and
+`PlastPrior_dashboard.sqlite` normally; no separate figure file is required.

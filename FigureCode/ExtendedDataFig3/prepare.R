@@ -1,8 +1,7 @@
-source('FigureCode/_shared/current.R')
+#!/usr/bin/env Rscript
+source('FigureCode/_shared/managed.R')
+status <- system2(file.path(repo_root,'.venv/bin/python'),
+ c(shQuote(file.path(module_dir,'prepare.py')),shQuote(output_dir)))
+stopifnot(status==0L)
 source(file.path(module_dir,'setup.R'))
-input <- read_priority_sensitivity_input(list(row_count=as.integer(lock$ranked)),config)
-prepared <- prepare_priority_sensitivity_data(input,config,include_sensitivity=FALSE)
-save_nested(prepared$source_data);save_nested(prepared$audit_tables)
-save_facts(c(prepared$statistics,list(full_inventory=lock$total,breadth=prepared$source_data$positive_input_breadth$positive_input_breadth_metrics,missing='Full rankable population including partial evidence; positive means an available score greater than zero, not evidence completeness.')))
-
-save_plot_data(list(prepared=prepared))
+save_plot_data(read_gic_payload(file.path(output_dir,'source_data'),file.path(output_dir,'caption_facts.json')))

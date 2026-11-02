@@ -8,10 +8,10 @@
 | Fig2 | 待审 | [PNG](../result/figures/Fig2.png) · [PDF](../result/figures/Fig2.pdf) | 证据统计复核一致，待审 |
 | Fig3 | 已确认 | [PNG](../result/figures/Fig3.png) · [PDF](../result/figures/Fig3.pdf) | 已确认，可用于新稿 |
 | Fig4 | 已确认 | [PNG](../result/figures/Fig4.png) · [PDF](../result/figures/Fig4.pdf) | Level 1 用途、结构与监管三联图，已确认；旧敏感性分析已留档 |
-| Fig5 | 旧版，待更新 | [PNG](../result/figures/Fig5.png) · [PDF](../result/figures/Fig5.pdf) | 待重新设计，旧版勿用于新稿 |
+| Fig5 | 已确认 | [PNG](../result/figures/Fig5.png) · [PDF](../result/figures/Fig5.pdf) | 五级分类权重与阈值敏感性，已确认；图内文字精简，方法见图注 |
 | ExtendedDataFig1 | 待审 | [PNG](../result/figures/ExtendedDataFig1.png) · [PDF](../result/figures/ExtendedDataFig1.pdf) | 来源及交集统计一致，对齐检查通过，待审 |
 | ExtendedDataFig2 | 待审 | [PNG](../result/figures/ExtendedDataFig2.png) · [PDF](../result/figures/ExtendedDataFig2.pdf) | 证据可用性及正分交集一致，待审 |
-| ExtendedDataFig3 | 旧版，待更新 | [PNG](../result/figures/ExtendedDataFig3.png) · [PDF](../result/figures/ExtendedDataFig3.pdf) | 待重新设计，旧版勿用于新稿 |
+| ExtendedDataFig3 | 已确认 | [PNG](../result/figures/ExtendedDataFig3.png) · [PDF](../result/figures/ExtendedDataFig3.pdf) | 已确认，可用于新稿 |
 | ExtendedDataFig4 | 旧版，待更新 | [PNG](../result/figures/ExtendedDataFig4.png) | 等待 Dashboard 更新 |
 
 五级分类仅在绘图层派生，当前 CSV 和 SQLite 的评分排名未改变。

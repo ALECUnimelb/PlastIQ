@@ -28,10 +28,11 @@
       "entrypoint": "FigureCode/Fig4/run_plot.py"
     },
     "Fig5": {
-      "managed": false,
-      "formal": "legacy",
+      "managed": true,
+      "formal": "current",
       "review": false,
-      "note": "待重新设计，旧版勿用于新稿"
+      "entrypoint": "FigureCode/Fig5/run_plot.py",
+      "note": "五级分类权重与阈值敏感性，已确认；图内文字精简，方法见图注"
     },
     "ExtendedDataFig1": {
       "managed": true,
@@ -46,10 +47,11 @@
       "note": "证据可用性及正分交集一致，待审"
     },
     "ExtendedDataFig3": {
-      "managed": false,
-      "formal": "legacy",
+      "managed": true,
+      "formal": "current",
       "review": false,
-      "note": "待重新设计，旧版勿用于新稿"
+      "note": "已确认，可用于新稿",
+      "entrypoint": "FigureCode/ExtendedDataFig3/run_plot.py"
     },
     "ExtendedDataFig4": {
       "managed": false,
@@ -65,5 +67,6 @@
       "entrypoint": "FigureCode/Supplementary/SILevel1Evidence/run_plot.py",
       "note": "101 个化合物，Excel 与完整 PDF 待审"
     }
-  }
+  },
+  "exploratory": {}
 }

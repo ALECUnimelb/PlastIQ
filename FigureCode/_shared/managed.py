@@ -15,7 +15,7 @@ from result_paths import figure_paths, relocated, verify_code, RESULT, manifest_
 
 ROOT = Path(__file__).resolve().parents[2]
 FIGURES = ROOT / 'FigureCode'
-MANAGED = {'Fig1','Fig2','Fig3','ExtendedDataFig1','ExtendedDataFig2','Fig4'}
+MANAGED = {'Fig1','Fig2','Fig3','ExtendedDataFig1','ExtendedDataFig2','ExtendedDataFig3','Fig4','Fig5'}
 
 def sha(path):
     with Path(path).open('rb') as stream:
@@ -46,10 +46,6 @@ def code_hashes(folder):
     paths = [p for p in folder.rglob('*') if p.is_file() and p.suffix in {'.R','.py','.yml'}
              and not any(part in {'output','review','reference','audit','inputs','__pycache__'} or part.startswith('.') for part in p.relative_to(folder).parts)]
     paths += [FIGURES/'_shared'/n for n in ('result_paths.py','managed.py','managed.R','plot_data.R','preparation.py','five_level_policy.json','palette.R','theme.R','export.R','validation.R')]
-    if folder.name in {'Fig5','ExtendedDataFig3'}:
-        paths += [FIGURES/'_shared'/n for n in ('current.R','priority_policy.R','scenarios.R')]
-    if folder.name=='ExtendedDataFig3':
-        paths += [p for p in (FIGURES/'_shared/sensitivity').rglob('*') if p.suffix in {'.R','.yml'}]
     return {str(p.relative_to(ROOT)):sha(p) for p in sorted(paths)}
 
 def paths_for(figure,state):

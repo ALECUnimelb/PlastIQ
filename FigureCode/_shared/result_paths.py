@@ -74,6 +74,8 @@ def verify_digest(path, expected):
     ledgers = [receipt().get('storage_migration', {}).get('code_relocations', {}),
                receipt().get('layout_cleanup', {}).get('code_transitions', {}),
                receipt().get('code_layout', {}).get('code_transitions', {})]
+    # Later figure adoptions append transitions without rewriting historical hashes.
+    ledgers += [item.get('code_transitions', {}) for item in receipt().get('figure_adoptions', {}).values()]
     ledger = ROOT/'audit_archive/workspace_migration_20261026/code_relocations.json'
     if ledger.exists(): ledgers.append(json.loads(ledger.read_text()))
     for ledger in ledgers:

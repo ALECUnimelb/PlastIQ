@@ -11,8 +11,8 @@ import tempfile
 from result_paths import ROOT, RESULT, manifest_path, relocated
 from managed import sha, write_json, code_hashes
 
-CURRENT = ('Fig1','Fig2','Fig3','Fig4','ExtendedDataFig1','ExtendedDataFig2','SILevel1Evidence')
-FROZEN = ('Fig5','ExtendedDataFig3')
+CURRENT = ('Fig1','Fig2','Fig3','Fig4','Fig5','ExtendedDataFig1','ExtendedDataFig2','ExtendedDataFig3','SILevel1Evidence')
+FROZEN = ()
 
 def hashes(folder):
     return {str(p.relative_to(folder)): sha(p) for p in sorted(folder.rglob('*')) if p.is_file() and p.name != '.DS_Store'}

@@ -7,8 +7,8 @@ are created. Use [INDEX.md](INDEX.md) and [SI_INDEX.md](SI_INDEX.md) for figure 
 
 - `Fig1`–`Fig5`, `ExtendedDataFig1`–`ExtendedDataFig4`: manuscript figures.
 - `Supplementary/`: SI evidence workbook/PDF, retained identity list and tree.
-- `_shared/`: common plotting and storage helpers; `sensitivity/` contains the
-  frozen sensitivity functions required by Extended Data Fig. 3.
+- `_shared/`: common plotting and storage helpers; `sensitivity/` retains
+  legacy functions associated with the explicitly retained old sensitivity figure.
 
 ## Prepare data, then render
 
@@ -20,6 +20,8 @@ are created. Use [INDEX.md](INDEX.md) and [SI_INDEX.md](SI_INDEX.md) for figure 
 # Render a layout from its prepared inputs.
 .venv/bin/python FigureCode/Fig3/run_plot.py
 .venv/bin/python FigureCode/Fig4/run_plot.py
+.venv/bin/python FigureCode/Fig5/run_plot.py
+.venv/bin/python FigureCode/ExtendedDataFig3/run_plot.py
 .venv/bin/python FigureCode/Supplementary/SILevel1Evidence/run_plot.py
 # Verify all current deliverables and original provenance.
 .venv/bin/python FigureCode/verify_figures.py
@@ -34,9 +36,9 @@ set, validates it, and replaces it together. Changed numerical data mark the
 existing images stale; verification and PPT generation reject stale figures until
 they are rendered again. Failures retain the last complete set.
 
-Fig. 5 and Extended Data Fig. 3 retain their fixed legacy baseline. Preparing them
-requires explicit `--figures Fig5 ExtendedDataFig3`; this never upgrades their
-scientific status. Extended Data Fig. 4 is a separate Dashboard capture. The
+Extended Data Fig. 3 now uses current-data GIC concordance and is included in
+default preparation. It is approved, as recorded in `catalog.json`. Its retired GIC exploration
+module and exports are removed. Extended Data Fig. 4 is a separate Dashboard capture. The
 retained identity list and tree use their existing classified table through
 `FigureCode/run_retained.py`. Structural reclassification requires separate
 review, and a changed Level 1 membership fails the Fig. 4 consistency check.
@@ -60,3 +62,5 @@ Current images and the user-edited presentation were preserved during the code
 reorganization. Fig. 4 retains the accepted three-bar layout; Fig. 3 visual redesign
 is a separate task. Original manifests retain historical paths, resolved through
 `_shared/result_paths.py`. See [storage rules](../docs/results_layout.md).
+
+Fig. 5 is the current five-level sensitivity analysis. Its simplified image and full caption replace the former policy-concordance Fig. 5. The separate sensitivity exploration module and draft exports have been retired. The user-edited deck currently omits Fig. 1; targeted updates preserve that manual page selection.

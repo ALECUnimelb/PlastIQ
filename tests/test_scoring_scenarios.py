@@ -12,13 +12,21 @@ from plastprior.scoring_scenarios import (
 class ScenarioTests(unittest.TestCase):
     def test_all_sixteen_label_combinations(self):
         labels = ['vH', 'H', 'M', 'L']
-        expected = [[1, 1, 2, 2], [1, 2, 3, 3], [2, 3, 4, 4], [2, 3, 4, 4]]
+        expected = [[1, 2, 3, 3], [2, 3, 4, 4], [3, 4, 5, 5], [3, 4, 5, 5]]
         for i, hazard in enumerate(labels):
             for j, exposure in enumerate(labels):
                 self.assertEqual(priority_level(hazard, exposure), expected[i][j])
         self.assertIsNone(priority_level(None, 'vH'))
         with self.assertRaises(ValueError):
             priority_level('unknown', 'L')
+
+    def test_classification_matches_manuscript_matrix(self):
+        import json
+        from pathlib import Path
+        policy = json.loads((Path(__file__).resolve().parents[1] / 'FigureCode/_shared/five_level_policy.json').read_text())
+        labels = ['L', 'M', 'H', 'vH']
+        self.assertEqual([[priority_level(h, e) for e in labels] for h in labels],
+                         policy['level_matrix_L_M_H_vH'])
 
     def test_approved_default_maxima_and_unchanged_source(self):
         record = dict(COMPONENT_MAXIMA)

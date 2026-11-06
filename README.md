@@ -2,7 +2,7 @@
 
 ## Rounded scoring update (2026-10-27)
 
-Current rounded H/E scores, four-level labels and configurable Dashboard scenarios
+Current rounded H/E scores, five-level labels and configurable Dashboard scenarios
 are documented in [docs/rounded_scoring.md](docs/rounded_scoring.md). Use
 `result/` for the new CSV and paired SQLite files; the 2026-10-26
 export and manuscript figures remain the frozen baseline.

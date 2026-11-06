@@ -87,19 +87,21 @@ def domain_label(score, thresholds, *, upper_inclusive):
 
 
 def priority_level(hazard_label, exposure_label):
-    """The approved symmetric 4x4 decision matrix; unknown domains stay unclassified."""
+    """The five-level symmetric 4x4 matrix; unknown domains stay unclassified."""
     if hazard_label is None or exposure_label is None:
         return None
     if hazard_label not in LABELS or exposure_label not in LABELS:
         raise ValueError('Unknown domain label.')
     low, high = sorted((LABELS.index(hazard_label), LABELS.index(exposure_label)))
-    if high == 3 and low >= 2:
+    if low == 3:
         return 1
-    if high == 3 or low == 2:
+    if high == 3 and low == 2:
         return 2
-    if high == 2:
+    if high == 3 or low == 2:
         return 3
-    return 4
+    if high == 2:
+        return 4
+    return 5
 
 
 def default_policy():

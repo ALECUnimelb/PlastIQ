@@ -104,7 +104,7 @@ def refresh_index():
         links = f'[PNG](../result/figures/{fig}.png)'
         if (RESULT/'figures'/f'{fig}.pdf').exists(): links += f' · [PDF](../result/figures/{fig}.pdf)'
         lines.append(f'| {fig} | {status} | {links} | {item["note"]} |')
-    lines += ['', '五级分类仅在绘图层派生，当前 CSV 和 SQLite 的评分排名未改变。', '',
+    lines += ['', '当前 CSV、SQLite 与绘图统一采用五级分类，评分和排名未改变。', '',
               '明确保留：Level1_identity（名单）、Level1_classification_tree（分类树）、Sensitivity_analysis（旧敏感性分析）。',
               '所有图片位于 `result/figures/`，数据位于 `result/figure_data/`，唯一审阅 PPT 位于 `result/`，保留用户命名。','']
     (FIGURES/'INDEX.md').write_text('\n'.join(lines))

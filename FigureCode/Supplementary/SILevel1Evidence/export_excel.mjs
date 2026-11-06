@@ -100,7 +100,7 @@ const definitions=[
  ['Primary / detailed uses','User-supplied annotations joined by full InChIKey. A primary use is one display category; detailed uses may overlap. Unclassified compounds remain in the table.'],
  ['Annotation status','Indicates an available annotation, missing classification, or changed identity labels requiring review.'],
  ['Annotation source / review','Per-compound source and review notes when supplied. A blank source means no row-level citation was provided; it does not indicate independent verification.'],
- ['Figure / source level','Figure level uses the five-level policy; source level preserves the CSV classification, which currently has four levels. These are distinct classifications.'],
+ ['Figure / source level','Figure and source levels use the same five-level classification; source level is read from the current CSV.'],
  ['CAS / InChIKey','Chemical identifiers stored as text. Name and CAS are current source values; InChIKey is the join key.'],
  ['GIC','Regulatory annotation as recorded in the selected database version. Full descriptions are retained beside the codes. These annotations do not contribute scoring points.'],
  ['Workbook use','A published data snapshot for sorting, filtering and inspection. Regenerate from the selected run to update data; editing cells does not apply a scoring scenario.'],

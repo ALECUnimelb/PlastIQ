@@ -1,4 +1,4 @@
-# Current rounded scores and retained evidence; five-level labels are figure-only.
+# Current rounded scores and retained evidence; five-level labels match the current export.
 args <- commandArgs(trailingOnly=TRUE)
 stopifnot(length(args)==1L)
 module_dir <- dirname(normalizePath(sub('^--file=','',grep('^--file=',commandArgs(FALSE),value=TRUE)[1])))

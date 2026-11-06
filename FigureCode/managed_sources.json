@@ -4,11 +4,11 @@
   "files": {
     "analysis": {
       "path": "result/PlastPrior_results.sqlite",
-      "sha256": "b7c22744101ff32ac8286493c575394a690bae040b6acf8c7d86d65892d83ad6"
+      "sha256": "847aefb9ff84940ea09a00c639ba1606cbbec839389b218876c9b3894b541018"
     },
     "publication": {
       "path": "result/PlastPrior_results.csv",
-      "sha256": "280fde89c1f3ac2625dd963a6bdf44fd03833f42bb87acfd7fa06824b3fed637"
+      "sha256": "695965e87e548de2035915410fa32401796855d62ef1a49846b58a93cd29bbc2"
     }
   },
   "total": 15125,
@@ -17,5 +17,5 @@
   "policy": {
     "path": "FigureCode/_shared/five_level_policy.json"
   },
-  "scope": "Figure-only five-level classification; source CSV and SQLite retain their four-level classification"
+  "scope": "Current CSV, SQLite, manuscript figures and Dashboard use the same five-level classification; scores and ranks unchanged."
 }

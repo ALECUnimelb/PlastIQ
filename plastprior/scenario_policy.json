@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "policy_version": "priority-rounded-domains-v1",
+  "policy_version": "priority-rounded-five-level-v1",
   "hazard_weights": {"Persistence_score": 2, "Mobility_score": 1, "Bioaccumulation_score": 2, "Toxicity_score": 3},
   "exposure_weights": {"Exposure_food_contact_score": 1, "Exposure_human_biomonitoring_score": 1, "Exposure_inventory_score": 3, "Exposure_production_score": 1, "Exposure_patent_score": 2, "Exposure_literature_score": 1},
   "thresholds": {"hazard": [4, 8, 12], "exposure": [4, 8, 12]},

@@ -52,7 +52,7 @@ class ExportTests(unittest.TestCase):
             self.assertEqual(summary['rows'],1)
             with closing(sqlite3.connect(output/archive.name)) as db, db:
                 self.assertEqual(db.execute('SELECT Hazard_score FROM compounds').fetchone()[0],'0.5')
-                self.assertEqual(db.execute('SELECT Hazard_score,Hazard_score_raw,Priority_level FROM current_compounds').fetchone(),('1','0.50','4'))
+                self.assertEqual(db.execute('SELECT Hazard_score,Hazard_score_raw,Priority_level FROM current_compounds').fetchone(),('1','0.50','5'))
                 self.assertEqual(db.execute('SELECT evidence FROM audit_records').fetchone()[0],'unchanged')
             with closing(sqlite3.connect(output/detail.name)) as db, db:
                 meta=dict(db.execute('SELECT key,value FROM metadata'))

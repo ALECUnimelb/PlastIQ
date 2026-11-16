@@ -1,14 +1,14 @@
 {
   "schema_version": 1,
-  "run_id": "20261027T080120Z-rounded",
+  "run_id": "20261116T070538Z-rounded",
   "files": {
     "analysis": {
       "path": "result/PlastPrior_results.sqlite",
-      "sha256": "847aefb9ff84940ea09a00c639ba1606cbbec839389b218876c9b3894b541018"
+      "sha256": "7a72ddb2b9ec86018a2a4a1fe5d72abf7ed68b4ae7bf6adeb85ff762a3b8c46a"
     },
     "publication": {
       "path": "result/PlastPrior_results.csv",
-      "sha256": "695965e87e548de2035915410fa32401796855d62ef1a49846b58a93cd29bbc2"
+      "sha256": "dc699dddd4caa1588b32296cc0a8e6d89098972bcca384ee440d8b071f2e55a2"
     }
   },
   "total": 15125,
@@ -17,5 +17,5 @@
   "policy": {
     "path": "FigureCode/_shared/five_level_policy.json"
   },
-  "scope": "Current CSV, SQLite, manuscript figures and Dashboard use the same five-level classification; scores and ranks unchanged."
+  "scope": "PBMT three-level scores and exposure scored directly from selected raw inputs under exposure-three-level-rules-v1."
 }

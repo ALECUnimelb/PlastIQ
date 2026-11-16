@@ -1,10 +1,10 @@
 source('FigureCode/_shared/managed.R')
 source(file.path(module_dir,'setup.R'))
-identity_dir <- file.path(repo_root,'result/figure_data/Level1Identity')
+identity_dir <- Sys.getenv('PLASTPRIOR_CLASSIFICATION_STAGE',file.path(repo_root,'result/figure_data/Level1Identity'))
 d <- as.data.frame(readr::read_csv(file.path(identity_dir,'compound_identity.csv'),show_col_types=FALSE))
 full <- as.data.frame(readr::read_csv(file.path(repo_root,lock$files$publication$path),show_col_types=FALSE))
 idx <- match(d$inchikey,full$inchikey)
-stopifnot(nrow(d)==101L,!anyDuplicated(d$inchikey),!anyNA(idx),all(d$Figure_priority_level==1),
+stopifnot(nrow(d)>0,!anyDuplicated(d$inchikey),!anyNA(idx),all(d$Figure_priority_level==1),
  setequal(d$inchikey,full$inchikey[full$Hazard_score>=12 & full$Exposure_score>=12]))
 for(f in c('Name','CAS','SMILES','Hazard_score','Exposure_score','Priority_score','Priority_rank','Top_n_selected'))
  stopifnot(identical(as.character(d[[f]]),as.character(full[[f]][idx])))
@@ -13,6 +13,7 @@ counts <- function(v) {x<-as.data.frame(table(v),stringsAsFactors=FALSE);names(x
 use <- counts(d$primary_use)
 use <- use[order(-use$n,use$category,method='radix'),]
 use_labels <- c('Chemical intermediate or reagent'='Intermediate / reagent',
+ 'Pending use review'='Pending use review',
  'Pesticide or biocide'='Pesticide / biocide','Polymer starting material'='Polymer starting material',
  'Solvent'='Solvent','Flame retardant'='Flame retardant',
  'Contaminant or transformation product'='Contaminant /\ntransformation product',
@@ -40,12 +41,12 @@ stopifnot(setequal(reg$category,reg_order))
 reg <- reg[match(reg_order,reg$category),]
 reg$label <- c('Prohibited / phase-out','Restricted / authorisation','Candidate / high concern',
  'Monitoring / reporting /\nhazard classification','Inventory / registration / use')
-stopifnot(nrow(use)==16,nrow(structure)==9,nrow(reg)==5,
- all(vapply(list(use,structure,reg),function(x)sum(x$n),numeric(1))==101),!anyNA(use$label))
+stopifnot(nrow(structure)==9,nrow(reg)==5,
+ all(vapply(list(use,structure,reg),function(x)sum(x$n),numeric(1))==nrow(d)),!anyNA(use$label))
 for(nm in c('use','structure','reg')) save_table(get(nm),paste0(nm,'_counts'))
 save_table(d,'compound_membership')
 file.copy(file.path(identity_dir,c('compound_identity.csv','classification.json')),file.path(output_dir,'source_data'),overwrite=TRUE)
-file.copy(file.path(repo_root,'result/figure_data/_dependencies/Level1_101_aligned_uses_en.csv'),file.path(output_dir,'source_data/primary_use_annotations.csv'),overwrite=TRUE)
-save_facts(list(cohort=101,panels=c(16,9,5),scores_ranks_unchanged=TRUE))
+save_table(d[,intersect(c('record_id','inchikey','Name','CAS','primary_use','detailed_uses','annotation_status'),names(d))],'primary_use_annotations')
+save_facts(list(cohort=nrow(d),panels=c(nrow(use),nrow(structure),nrow(reg)),pending_use_review=sum(d$primary_use=='Pending use review'),scores_ranks_unchanged=TRUE))
 
 save_plot_data(list(use=use,structure=structure,reg=reg))

@@ -72,6 +72,10 @@ pbmt_assert_vectors_equal <- function(observed, expected, message, tolerance = 1
 }
 
 pbmt_agreement_band <- function(difference, config) {
+  if (isTRUE(three_level_pbmt)) {
+    if (any(!is.na(difference) & !difference %in% 0:2)) stop('Invalid mapped score difference')
+    return(factor(pbmt_agreement_levels[difference+1L],levels=pbmt_agreement_levels))
+  }
   exact_tolerance <- as.numeric(config$thresholds$exact_tolerance)
   near_max <- as.numeric(config$thresholds$near_difference_max)
   moderate_max <- as.numeric(config$thresholds$moderate_difference_max)
@@ -117,21 +121,30 @@ read_pbmt_concordance_input <- function(snapshot, config) {
       compounds[[item$final_score_field]], item$final_score_field
     )
     computational <- assert_discrete_numeric(
-      computational, pbmt_computational_score_levels,
+      computational, c(0,0.5,1,2),
       paste0(dimension_id, " computational score"), allow_missing = TRUE
     )
     plastchem <- assert_discrete_numeric(
-      plastchem, pbmt_plastchem_score_levels,
+      plastchem, c(0,0.25,0.5,1,2),
       paste0(dimension_id, " PlastChem score"), allow_missing = TRUE
     )
     selected_final <- assert_discrete_numeric(
-      selected_final, pbmt_plastchem_score_levels,
+      selected_final, c(0,0.25,0.5,1,2),
       paste0(dimension_id, " selected final score"), allow_missing = TRUE
     )
     stored_final <- assert_discrete_numeric(
       stored_final, pbmt_plastchem_score_levels,
       item$final_score_field, allow_missing = TRUE
     )
+    computational_raw <- computational
+    plastchem_raw <- plastchem
+    selected_final_raw <- selected_final
+    if (isTRUE(three_level_pbmt)) {
+      map <- function(x) {x[!is.na(x) & x %in% c(0.25,0.5)] <- 1; x}
+      computational <- map(computational)
+      plastchem <- map(plastchem)
+      selected_final <- map(selected_final)
+    }
     pbmt_assert_vectors_equal(
       stored_final,
       selected_final,
@@ -162,8 +175,11 @@ read_pbmt_concordance_input <- function(snapshot, config) {
       dimension_order = item$order,
       method_label = pbmt_dimension_config(config, dimension_id)$method_label,
       computational_score = computational,
+      computational_score_raw = computational_raw,
       plastchem_score = plastchem,
+      plastchem_score_raw = plastchem_raw,
       selected_final_score = selected_final,
+      selected_final_score_raw = selected_final_raw,
       stored_final_score = stored_final,
       final_score_basis = compounds[[item$basis_field]],
       coverage_category = coverage_category,

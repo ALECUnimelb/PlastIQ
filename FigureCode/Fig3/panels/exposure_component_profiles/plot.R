@@ -6,6 +6,7 @@
 
 plot_exposure_component_profiles <- function(panel_data, config, variant = "publication") {
   profiles <- panel_data$exposure_component_profiles
+  if (isTRUE(three_level_exposure)) exposure_profile_levels <- setdiff(exposure_profile_levels, 'Low (0.5)')
   component_levels <- rev(names(exposure_dimensions))
   profiles$component <- factor(profiles$component, levels = component_levels)
   profiles$score_class <- factor(profiles$score_class, levels = exposure_profile_levels)

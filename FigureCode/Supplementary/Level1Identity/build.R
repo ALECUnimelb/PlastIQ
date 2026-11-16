@@ -1,9 +1,10 @@
 #!/usr/bin/env Rscript
-# Complete chemical-identity figure: 101 names, nine structural display groups.
+# Complete current Level 1 identities, nine structural display groups.
 # All drawing in R/grid. Arial 8.2 pt body, editable SVG/PDF, 600 dpi PNG.
 # Review width_mm = 297; height fits measured text without clipping or exclusions.
 suppressPackageStartupMessages(library(grid))
-root <- '/Users/ruiwang/Projects/APPs/PlastPrior'
+script <- normalizePath(sub('^--file=','',grep('^--file=',commandArgs(FALSE),value=TRUE)[1]))
+root <- dirname(dirname(dirname(dirname(script))))
 module <- file.path(root,'FigureCode/Supplementary/Level1Identity')
 data_dir <- file.path(root,'result/figure_data/Level1Identity')
 args <- commandArgs(trailingOnly=TRUE)
@@ -16,7 +17,7 @@ font <- resolve_manuscript_font()
 stopifnot(capabilities('cairo'))
 d <- read.csv(file.path(data_dir,'compound_identity.csv'),check.names=FALSE,stringsAsFactors=FALSE)
 report <- jsonlite::fromJSON(file.path(data_dir,'classification.json'))
-stopifnot(nrow(d)==101L,!anyDuplicated(d$inchikey),all(d$inchikey==d$regenerated_inchikey))
+stopifnot(nrow(d)==report$cohort_count,!anyDuplicated(d$inchikey),all(d$inchikey==d$regenerated_inchikey))
 for(p in names(report$source_hashes)) stopifnot(digest::digest(file=relocated_result_path(root,p),algo='sha256',serialize=FALSE)==report$source_hashes[[p]])
 columns <- list(
  c('hal_non_aromatic','hal_heterocycle','nonhal_heterocycle'),
@@ -74,7 +75,7 @@ layout <- prepare_layout()
 grDevices::dev.off()
 height_mm <- layout$height_mm
 rendered <- unlist(lapply(layout$groups,function(g)vapply(g$rows,function(r)r$inchikey,character(1))))
-stopifnot(length(rendered)==101,!anyDuplicated(rendered),setequal(rendered,d$inchikey))
+stopifnot(length(rendered)==nrow(d),!anyDuplicated(rendered),setequal(rendered,d$inchikey))
 draw <- function() {
  grid.newpage()
  for(g in layout$groups) {
@@ -102,7 +103,7 @@ for(fmt in c('pdf','svg','png','preview.png')) {
  tryCatch(draw(),finally=grDevices::dev.off())
 }
 caption <- c(
- 'Chemical identities of the 101 compounds in five-level priority Level 1.',
+ sprintf('Chemical identities of the %d compounds in five-level priority Level 1.',nrow(d)),
  'All compounds with existing integer hazard and exposure scores each >=12 are included. Groups are derived from the supplied molecular structures; every SMILES parsed successfully and regenerated the exact supplied InChIKey. Numbers in group headings are compound counts. Names are retained from the input and alphabetised within each group. The grouping and alphabetical display do not alter scores or original ranks.',
  'X denotes F, Cl, Br or I. Halogenated non-aromatics have at least one halogen atom and no aromatic atoms; this group includes cyclic structures and may contain other heteroatoms. Halogenated heteroaromatics have an aromatic non-carbon atom. The other halogenated aromatic groups are assigned in order: N/S-containing structures (possibly also containing O); O-containing structures without N/S; then C/H/X-only structures. Halogens and functional heteroatoms may occur anywhere in the molecule, not necessarily directly on an aromatic ring.',
  'Non-halogenated compounds are assigned in order to heteroaromatics, oxygen-containing compounds, C/H-only aromatic compounds, then the remaining group. The latter comprises dibenzyl disulfide, thiourea and beta-guaiene. Classification uses RDKit aromaticity perception and is a mutually exclusive display scheme for this cohort, not a comprehensive chemical ontology or an inferred function in plastics.',
@@ -113,7 +114,7 @@ writeLines(caption,file.path(out,'captions.txt'))
 sha <- function(p) digest::digest(file=p,algo='sha256',serialize=FALSE)
 outputs <- list.files(out,full.names=TRUE);outputs<-outputs[basename(outputs)!='manifest.json' & !dir.exists(outputs)]
 manifest <- list(status='review',backend='R',width_mm=width_mm,height_mm=height_mm,
- font=font,body_font_pt=body_size,cohort_count=101,rendered_unique_names=101,
+ font=font,body_font_pt=body_size,cohort_count=nrow(d),rendered_unique_names=nrow(d),
  group_counts=report$group_counts,classification=report,source_scores_ranks_unchanged=TRUE,
  column_heights=layout$column_heights,
  display_order=lapply(layout$groups,function(g)vapply(g$rows,function(r)r$record_id,character(1))),
@@ -124,4 +125,4 @@ manifest <- list(status='review',backend='R',width_mm=width_mm,height_mm=height_
  'Body font explicitly set to 8.2 pt and headings to 9.3 pt; line widths checked on each output device',
  'TIFF omitted from review; editable PDF/SVG and 600 dpi PNG supplied'))
 jsonlite::write_json(manifest,file.path(out,'manifest.json'),pretty=TRUE,auto_unbox=TRUE)
-cat(sprintf('Rendered all 101 names in nine groups, %.0f x %.0f mm.\n',width_mm,height_mm))
+cat(sprintf('Rendered all %d names in nine groups, %.0f x %.0f mm.\n',nrow(d),width_mm,height_mm))

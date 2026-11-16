@@ -2,6 +2,7 @@
 source('FigureCode/_shared/managed.R')
 source(file.path(module_dir,'setup.R'))
 load_plot_data()
+configure_pbmt_scale()
 plots <- list(coverage=plot_pbmt_coverage(prepare_pbmt_coverage(prepared)$source_data,config,'publication'))
 for(id in names(pbmt_dimension_schema)) {
  d <- get(paste0('prepare_pbmt_',id))(prepared)

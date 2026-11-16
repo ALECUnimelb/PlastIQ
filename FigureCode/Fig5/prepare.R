@@ -25,7 +25,7 @@ compute<-function(weights=w,hcuts=c(4,8,12),ecuts=c(4,8,12)) {
 }
 b<-compute();base<-classify(x$Hazard_score,x$Exposure_score)
 stopifnot(all(b$h==x$Hazard_score),all(b$e==x$Exposure_score),all(b$lev==base),
- all(tabulate(base,5)==f$expected_counts))
+ all(base==x$Priority_level))
 points<-list();k<-0L
 for(j in seq_along(cols))for(delta in c(-20,20)) {
  weights<-w;weights[j]<-weights[j]*(100+delta)/100;lev<-compute(weights)$lev

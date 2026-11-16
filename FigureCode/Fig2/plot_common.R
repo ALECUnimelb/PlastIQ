@@ -31,7 +31,7 @@ pbmt_prepare_severity_plot_data <- function(source_data, dimension_id, config, v
     )
   }
   agreement$label_colour <- ifelse(
-    agreement$agreement_band %in% c("Exact", "Large (>1)"),
+    agreement$agreement_band %in% c("Exact", "Large (>1)", "Two-level difference"),
     "white", "#222222"
   )
   list(agreement = agreement, metrics = metrics)
@@ -70,7 +70,7 @@ plot_pbmt_agreement_severity <- function(source_data, dimension_id, config, vari
     ggplot2::scale_fill_manual(
       values = palette,
       breaks = pbmt_agreement_levels,
-      labels = c("Exact", "Near (≤0.5)", "Moderate (0.5–1)", "Large (>1)"),
+      labels = if (isTRUE(three_level_pbmt)) pbmt_agreement_levels else c("Exact", "Near (≤0.5)", "Moderate (0.5–1)", "Large (>1)"),
       drop = FALSE
     ) +
     ggplot2::scale_colour_identity() +
@@ -171,8 +171,8 @@ plot_pbmt_score_matrix <- function(source_data, dimension_id, config, variant) {
       subtitle = if (identical(variant, "audit_all_values")) {
         "Cell labels are true counts; outlined cells are exact matches."
       } else NULL,
-      x = "PlastChem score",
-      y = "Independent score"
+      x = if (isTRUE(three_level_pbmt)) "PlastChem score (mapped)" else "PlastChem score",
+      y = if (isTRUE(three_level_pbmt)) "Independent score (mapped)" else "Independent score"
     ) +
     pbmt_theme(base_size = 6.2) +
     ggplot2::theme(

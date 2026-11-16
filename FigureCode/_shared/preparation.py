@@ -59,10 +59,17 @@ def prepare(names, *, check_existing=False, install=True):
     with update_lock(RESULT), tempfile.TemporaryDirectory(prefix='.figure-prepare-',dir=ROOT) as temp:
         temp = Path(temp)
         original_files = {n: hashes(RESULT/'figure_data'/n) for n in names}
+        identity_stage = None
+        if 'Fig4' in names:
+            identity_stage = temp/'Level1Identity'
+            subprocess.run([sys.executable,str(ROOT/'FigureCode/Supplementary/Level1Identity/prepare.py')],
+                           cwd=ROOT,check=True,
+                           env=dict(os.environ,PLASTPRIOR_CLASSIFICATION_STAGE=str(identity_stage)))
         for name in names:
             folder = ROOT/'FigureCode'/('Supplementary/'+name if name=='SILevel1Evidence' else name)
             stage = temp/name; stage.mkdir()
             env = dict(os.environ, PLASTPRIOR_FIGURE_PHASE='prepare')
+            if name == 'Fig4': env['PLASTPRIOR_CLASSIFICATION_STAGE'] = str(identity_stage)
             if name == 'ExtendedDataFig1':
                 subprocess.run([sys.executable,str(folder/'prepare_data.py'),str(stage)],cwd=ROOT,env=env,check=True)
             if name == 'SILevel1Evidence':
@@ -112,6 +119,17 @@ def prepare(names, *, check_existing=False, install=True):
         if install:
             stage=temp/'result'
             shutil.copytree(RESULT,stage,copy_function=os.link)
+            if identity_stage is not None:
+                destination=stage/'figure_data/Level1Identity'
+                if destination.exists(): shutil.rmtree(destination)
+                shutil.copytree(identity_stage,destination)
+                # Retained images need review against the refreshed membership.
+                for retained in ('Level1Identity','Level1IdentityTree'):
+                    meta=stage/'figure_data/_metadata'/retained/'preparation.json'
+                    meta.unlink(missing_ok=True)
+                    write_json(meta,{'figure':retained,'source':profiles['current'],
+                                     'source_data':hashes(identity_stage),'images_require_update':True,
+                                     'reason':'Level 1 identity data refreshed with Fig4; render and review retained images.'})
             for name,record in records.items():
                 destination=stage/'figure_data'/name
                 if destination.exists():shutil.rmtree(destination)

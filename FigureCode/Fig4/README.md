@@ -1,3 +1,5 @@
+> Current publication: **Extended Data Fig. 4**. `Fig4` is the stable internal code/data ID. Use the root publication registry and render entrypoint. Historical descriptions below retain internal IDs.
+
 # Fig. 4 — Level 1 composition
 
 `prepare.R` checks the same 101 Level 1 compounds, retained primary-use and
@@ -14,3 +16,7 @@ checks that original snapshot; `approved_composition.json` is its source lock.
 Historical sensitivity functions live in `_shared/sensitivity/`, consumed by
 Extended Data Fig. 3. The retained sensitivity image and original research
 archive remain unchanged.
+
+Current PBMT results contain 115 Level 1 compounds, including 14 with pending
+primary-use review (17 displayed groups). The original 101-member approval
+described above is historical; current images remain pending review.

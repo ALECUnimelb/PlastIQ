@@ -12,6 +12,7 @@ import subprocess
 import sys
 import tempfile
 from result_paths import figure_paths, relocated, verify_code, RESULT, manifest_path, artifact_path
+from publication import entries, entry, output_name, publish_asset
 
 ROOT = Path(__file__).resolve().parents[2]
 FIGURES = ROOT / 'FigureCode'
@@ -45,7 +46,8 @@ def verify_sources():
 def code_hashes(folder):
     paths = [p for p in folder.rglob('*') if p.is_file() and p.suffix in {'.R','.py','.yml'}
              and not any(part in {'output','review','reference','audit','inputs','__pycache__'} or part.startswith('.') for part in p.relative_to(folder).parts)]
-    paths += [FIGURES/'_shared'/n for n in ('result_paths.py','managed.py','managed.R','plot_data.R','preparation.py','five_level_policy.json','palette.R','theme.R','export.R','validation.R')]
+    paths += [FIGURES/'_shared'/n for n in ('publication.py','result_paths.py','managed.py','managed.R','plot_data.R','preparation.py','five_level_policy.json','palette.R','theme.R','export.R','validation.R')]
+    paths.append(FIGURES/'publication_order.json')
     return {str(p.relative_to(ROOT)):sha(p) for p in sorted(paths)}
 
 def paths_for(figure,state):
@@ -80,7 +82,7 @@ def replace_pair(image_stage,data_stage,image_target,data_target):
             (stage/'figures').mkdir(exist_ok=True)
             for source in image_stage.iterdir():
                 if not source.is_file(): continue
-                target=(stage/'figures' if source.suffix in {'.png','.pdf','.xlsx'} else metadata)/source.name
+                target=(stage/'figures'/output_name(name,source.name) if source.suffix in {'.png','.pdf','.xlsx'} else metadata/source.name)
                 target.unlink(missing_ok=True)
                 shutil.copy2(source,target)
             replace_directory(stage,RESULT)
@@ -99,20 +101,25 @@ def refresh_index():
     catalog = json.loads((FIGURES/'catalog.json').read_text())
     lines = ['# 图表清单','', '每个图号只有一套当前文件。状态由本表记录，生成新版替换同名文件，不保留并行正式/待审目录。','',
              '| 图 | 当前状态 | 文件 | 说明 |','|---|---|---|---|']
-    for fig,item in catalog['figures'].items():
+    for row in entries():
+        fig=row['id']; item=catalog['figures'][fig]
         status = '待审' if item['review'] else ('已确认' if item['formal']=='current' else '旧版，待更新')
-        links = f'[PNG](../result/figures/{fig}.png)'
-        if (RESULT/'figures'/f'{fig}.pdf').exists(): links += f' · [PDF](../result/figures/{fig}.pdf)'
-        lines.append(f'| {fig} | {status} | {links} | {item["note"]} |')
+        published=row['name']
+        links = f'[PNG](../result/figures/{published}.png)'
+        if (RESULT/'figures'/f'{published}.pdf').exists(): links += f' · [PDF](../result/figures/{published}.pdf)'
+        lines.append(f'| {row["label"]} | {status} | {links} | {item["note"]}；内部数据标识 `{fig}` |')
     lines += ['', '当前 CSV、SQLite 与绘图统一采用五级分类，评分和排名未改变。', '',
               '明确保留：Level1_identity（名单）、Level1_classification_tree（分类树）、Sensitivity_analysis（旧敏感性分析）。',
-              '所有图片位于 `result/figures/`，数据位于 `result/figure_data/`，唯一审阅 PPT 位于 `result/`，保留用户命名。','']
+              '所有图片位于 `result/figures/`，数据位于 `result/figure_data/<内部数据标识>/`，唯一审阅 PPT 位于 `result/`，保留用户命名。',
+              '稿件顺序由 `publication_order.json` 唯一管理：4 张主图、6 张扩展图。使用 `run_plot.py --figure <当前图名>` 绘图。','']
     (FIGURES/'INDEX.md').write_text('\n'.join(lines))
 
 
 def run(folder):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.parse_args()  # No arbitrary/versioned destination directories.
+    if entry(folder.name) and entry(folder.name).get('asset'):
+        return publish_asset(folder.name)
     if folder.name not in MANAGED: raise ValueError('Figure not migrated')
     from preparation import verify_prepared
     prepared_record = verify_prepared(folder.name)
@@ -151,12 +158,19 @@ def run(folder):
         write_json(staging/'preparation.json',prepared_record)
         replace_pair(staging,data_stage,images,data_target)
         update_catalog(folder.name,review=True,note='新版已生成，等待审阅', **({'publication_mode':'rendered'} if folder.name=='Fig4' else {}))
-        print(f'{folder.name}: {images/folder.name}.png (review only)')
+        print(f'{entry(folder.name)["label"]}: {artifact_path(folder.name,folder.name+".png")} (review only)')
     finally:
         if staging.exists(): shutil.rmtree(staging)
         if data_stage and data_stage.exists() and data_stage.name.startswith('.building-'): shutil.rmtree(data_stage)
 
 def approve(figure):
+    if (entry(figure) or {}).get('asset'):
+        from publication import verify_asset, asset_path
+        record=verify_asset(figure)
+        record['status']='approved'
+        write_json(asset_path(figure),record)
+        update_catalog(figure,formal='current',review=False,note='稿件导入图片已确认')
+        return
     if figure not in MANAGED: raise ValueError('Figure is deferred, not eligible for promotion')
     manifest=relocated(json.loads(manifest_path(figure).read_text()))
     assert manifest['status']=='review'

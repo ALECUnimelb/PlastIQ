@@ -16,8 +16,8 @@ class FlatStorageTests(TestCase):
         with TemporaryDirectory() as temp:
             root=Path(temp);result=root/'result'
             (result/'figures').mkdir(parents=True)
-            (result/'figures/Fig1.png').write_bytes(b'old image')
-            (result/'figures/Fig2.png').write_bytes(b'neighbour')
+            (result/'figures/ExtendedDataFig1.png').write_bytes(b'old image')
+            (result/'figures/Fig1.png').write_bytes(b'neighbour')
             (result/'PlastPrior_results.sqlite').write_bytes(b'unchanged database')
             data=result/'figure_data/Fig1';data.mkdir(parents=True)
             (data/'counts.csv').write_text('old table')
@@ -29,9 +29,9 @@ class FlatStorageTests(TestCase):
             tables=root/'new-data';tables.mkdir();(tables/'counts.csv').write_text('new table')
             with patch.object(managed,'ROOT',root),patch.object(managed,'RESULT',result),patch.object(result_paths,'RESULT',result):
                 managed.replace_pair(images,tables,result/'figures',data)
-            self.assertEqual((result/'figures/Fig2.png').read_bytes(),b'neighbour')
+            self.assertEqual((result/'figures/Fig1.png').read_bytes(),b'neighbour')
             self.assertEqual((result/'PlastPrior_results.sqlite').read_bytes(),b'unchanged database')
-            self.assertEqual((result/'figures/Fig1.png').read_bytes(),b'new image')
+            self.assertEqual((result/'figures/ExtendedDataFig1.png').read_bytes(),b'new image')
             self.assertEqual((data/'counts.csv').read_text(),'new table')
             self.assertEqual(json.loads((meta/'manifest.json').read_text())['status'],'review')
             self.assertFalse((result/'figures/manifest.json').exists())

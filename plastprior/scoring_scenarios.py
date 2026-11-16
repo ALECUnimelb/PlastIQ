@@ -5,6 +5,8 @@ Label thresholds and scale choices are explicit: no scientific defaults are infe
 """
 from decimal import Decimal, InvalidOperation
 
+from .hazard_score_mapping import MAPPING_VERSION, mapped_hazard_fields
+
 
 HAZARD_WEIGHTS = {
     'Persistence_score': 2, 'Mobility_score': 1,
@@ -18,6 +20,8 @@ EXPOSURE_WEIGHTS = {
 COMPONENT_MAXIMA = {field: 2 for field in (*HAZARD_WEIGHTS, *EXPOSURE_WEIGHTS)}
 COMPONENT_MAXIMA.update(Exposure_food_contact_score=1, Exposure_human_biomonitoring_score=1)
 LABELS = ('L', 'M', 'H', 'vH')
+THREE_LEVEL_POLICY_VERSION = 'priority-pbmt-three-level-rounded-v1'
+THREE_LEVEL_EXPOSURE_POLICY_VERSION = 'priority-pbmt-exposure-rules-rounded-v1'
 
 
 def number(value):
@@ -110,13 +114,32 @@ def default_policy():
     return json.loads(Path(__file__).with_name('scenario_policy.json').read_text())
 
 
+def three_level_policy():
+    """Explicit opt-in until the coordinated data/Dashboard migration is reviewed."""
+    return {**default_policy(), 'policy_version': THREE_LEVEL_POLICY_VERSION,
+            'hazard_score_mapping': MAPPING_VERSION}
+
+
+def three_level_exposure_policy():
+    """PBMT mapping plus direct exposure rules applied to audited counts and quantities."""
+    return {**three_level_policy(), 'policy_version': THREE_LEVEL_EXPOSURE_POLICY_VERSION,
+            'exposure_score_policy': 'exposure-three-level-rules-v1'}
+
+
 def validate_policy(policy):
-    expected = default_policy()
+    if policy.get('policy_version') == THREE_LEVEL_EXPOSURE_POLICY_VERSION:
+        expected = three_level_exposure_policy()
+    else:
+        expected = three_level_policy() if policy.get('policy_version') == THREE_LEVEL_POLICY_VERSION else default_policy()
     if set(policy) != set(expected):
         raise ValueError('Scenario configuration has missing or unknown fields.')
     for field in ['schema_version', 'policy_version', 'rounding', 'normalization', 'ranking', 'missingness']:
         if policy[field] != expected[field]:
             raise ValueError('Unsupported scenario policy: ' + field)
+    if 'hazard_score_mapping' in expected and policy['hazard_score_mapping'] != MAPPING_VERSION:
+        raise ValueError('Unsupported hazard score mapping.')
+    if 'exposure_score_policy' in expected and policy['exposure_score_policy'] != expected['exposure_score_policy']:
+        raise ValueError('Unsupported exposure scoring rules.')
     if isinstance(policy['top_n'], bool) or not isinstance(policy['top_n'], int) or policy['top_n'] < 1:
         raise ValueError('Top-N must be a positive integer.')
     if set(policy['thresholds']) != {'hazard', 'exposure'}:
@@ -138,10 +161,27 @@ def score_record(record, policy):
     """Caller validates policy once per population; no intermediate rounding."""
     from decimal import ROUND_HALF_UP
     import json
+    output = {}
+    if policy['policy_version'] in {THREE_LEVEL_POLICY_VERSION, THREE_LEVEL_EXPOSURE_POLICY_VERSION}:
+        if policy.get('hazard_score_mapping') != MAPPING_VERSION:
+            raise ValueError('Unsupported hazard score mapping.')
+        fields = [*HAZARD_WEIGHTS, *[f for f in ('Aquatic_M_score', 'LRTP_M_score') if f in record]]
+        output = mapped_hazard_fields(record, fields)
+        record = {**record, **output}
+    elif any(field + '_original' in record for field in HAZARD_WEIGHTS):
+        raise ValueError('Use the preserved baseline to score under the legacy policy.')
+    if policy['policy_version'] == THREE_LEVEL_EXPOSURE_POLICY_VERSION:
+        from .exposure import POLICY, score_selected_exposure_inputs
+        if policy.get('exposure_score_policy') != POLICY['policy_version']:
+            raise ValueError('Unsupported exposure scoring rules.')
+        exposure = score_selected_exposure_inputs(record)
+        output.update(exposure)
+        record = {**record, **exposure}
+    if any(field + '_original' in record for field in EXPOSURE_WEIGHTS):
+        raise ValueError('Exposure mapping records are retired; use the preserved raw-input baseline.')
     results = {d: weighted_domain(record, policy[d + '_weights'], d, normalize_to=None)
                for d in ['hazard', 'exposure']}
     eligible = any(r['has_active_evidence'] for r in results.values())
-    output = {}
     for domain, result in results.items():
         name = domain.capitalize()
         rounded = int(result['score'].quantize(Decimal('1'), rounding=ROUND_HALF_UP))

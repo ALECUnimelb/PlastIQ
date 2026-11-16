@@ -2,7 +2,8 @@
 # Quantitative grid: GIC context, fixed-budget capture and its weight dependence.
 # R-only rendering; width_mm = 183; height_mm = 145; Arial >=6.5 pt; 600 dpi.
 suppressPackageStartupMessages({library(ggplot2);library(patchwork)})
-root <- '/Users/ruiwang/Projects/APPs/PlastPrior'
+script <- normalizePath(sub('^--file=','',grep('^--file=',commandArgs(FALSE),value=TRUE)[1]))
+root <- dirname(dirname(dirname(script)))
 args <- commandArgs(trailingOnly=TRUE);stopifnot(length(args)==1L)
 stage <- normalizePath(args[1])
 z <- readRDS(file.path(stage,'source_data/plot_data.rds'))
@@ -26,7 +27,8 @@ comp$level_label <- factor(paste0('Level ',comp$level,' (',format(ns[as.characte
 pa <- ggplot(comp,aes(pct,level_label,fill=status))+
  geom_col(width=.68,position=position_stack(reverse=TRUE))+
  scale_fill_manual(values=palette,breaks=codes,labels=labels,drop=FALSE)+
- scale_x_continuous(limits=c(0,100),breaks=c(0,25,50,75,100),expand=expansion(mult=c(0,.01)))+
+ scale_x_continuous(breaks=c(0,25,50,75,100),expand=expansion(mult=c(0,.01)))+
+ coord_cartesian(xlim=c(0,100))+
  labs(x='Compounds within each level (%)',y=NULL,fill=NULL,tag='a')+
  guides(fill=guide_legend(ncol=1,byrow=TRUE))+
  theme(legend.position='bottom',legend.justification='left',axis.ticks.y=element_blank(),
@@ -43,7 +45,7 @@ pb <- ggplot(b,aes(capture_pct,row))+
  scale_x_continuous(limits=c(0,26),breaks=c(0,5,10,15,20),expand=expansion(mult=0))+
  scale_y_continuous(breaks=4:1,labels=c('Integrated','Hazard only','Exposure only','No inventory'),
                     limits=c(.5,4.5),expand=expansion(mult=0))+
- labs(x='Captured (% of 1,451)',y=NULL,tag='b',title='Top 5% screened',subtitle='Baseline: 16.99%')+
+ labs(x='Captured (% of 1,451)',y=NULL,tag='b',title='Top 5% screened',subtitle=sprintf('Baseline: %.2f%%',baseline))+
  theme(axis.line.y=element_blank(),axis.ticks.y=element_blank())
 order <- unlist(z$config$components);cn <- unlist(z$config$component_labels)
 w$row <- match(w$component,rev(order));w$column <- ifelse(w$multiplier<1,1,2)
@@ -53,10 +55,10 @@ w$label <- sprintf('%.2f (%s)',w$capture_pct,delta)
 pc <- ggplot(w,aes(column,row))+
  geom_tile(aes(fill=delta_capture_pp),width=.97,height=.91,colour='white',linewidth=.3)+
  geom_text(aes(label=label),size=2.65,colour=ink)+
- scale_fill_gradient2(low='#D9E7EF',mid='white',high='#F0D8CF',midpoint=0,limits=c(-.5,.5),guide='none')+
+ scale_fill_gradient2(low='#D9E7EF',mid='white',high='#F0D8CF',midpoint=0,limits=c(-1,1)*max(.5,abs(w$delta_capture_pp)),guide='none')+
  scale_y_continuous(limits=c(.5,10.5),breaks=1:10,labels=unname(cn[rev(order)]),expand=expansion(mult=0))+
  scale_x_continuous(limits=c(.5,2.5),breaks=1:2,labels=c('Weight -20%','Weight +20%'),position='top',expand=expansion(mult=0))+
- labs(x=NULL,y=NULL,tag='c',title='Capture % (change in percentage points)',subtitle='Top 5% screened; baseline: 16.99%')+
+ labs(x=NULL,y=NULL,tag='c',title='Capture % (change in percentage points)',subtitle=sprintf('Top 5%% screened; baseline: %.2f%%',baseline))+
  theme(axis.line=element_blank(),axis.ticks=element_blank(),
        axis.text.x=element_text(size=7.5,face='bold',margin=margin(b=4)))
 figure <- ((pa|pb)/pc)+plot_layout(heights=c(1,1.02),widths=c(1.1,1))+

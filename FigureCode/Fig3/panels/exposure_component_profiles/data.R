@@ -18,6 +18,12 @@ classify_exposure_score <- function(values) {
 }
 
 build_exposure_profiles <- function(scores, partial_masks=NULL) {
+  if (isTRUE(three_level_exposure)) {
+    exposure_score_classes <- setdiff(exposure_score_classes, 'Low (0.5)')
+    if (any(vapply(scores, function(x) any(!is.na(x) & !x %in% c(0,1,2)), logical(1)))) {
+      stop('Current exposure rules require component scores 0, 1 or 2')
+    }
+  }
   rows <- list()
   positive_counts <- list()
   row_index <- 1L

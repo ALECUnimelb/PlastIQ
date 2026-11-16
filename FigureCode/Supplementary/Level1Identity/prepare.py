@@ -11,7 +11,7 @@ from pathlib import Path
 from rdkit import Chem, rdBase
 from rdkit.Chem import inchi
 
-ROOT = Path('/Users/ruiwang/Projects/APPs/PlastPrior')
+ROOT = Path(__file__).resolve().parents[3]
 MODULE = ROOT / 'FigureCode/Supplementary/Level1Identity'
 import os
 if 'PLASTPRIOR_CLASSIFICATION_STAGE' not in os.environ:
@@ -80,8 +80,19 @@ def main():
         ei = sum(float(r['Exposure_score']) >= v for v in policy['cutpoints'])
         return policy['level_matrix_L_M_H_vH'][hi][ei]
     expected = {r['inchikey'] for r in full if level(r) == 1}
-    assert len(inputs) == len(expected) == 101
-    assert {r['inchikey'] for r in inputs} == expected
+    original = {r['inchikey']: r for r in inputs}
+    assert len(original) == len(inputs), 'Duplicate primary-use annotation keys'
+    # Only the current cohort is rendered. Preserve source annotations verbatim;
+    # newly admitted compounds require human research, never an inferred use.
+    inputs = [dict(r, annotation_status='retained') for r in inputs if r['inchikey'] in expected]
+    for key in sorted(expected - original.keys()):
+        r = lookup[key]
+        inputs.append(dict(record_id='pending_' + key, inchikey=key,
+                           Name=r['Name'], CAS=r['CAS'],
+                           primary_use='Pending use review', detailed_uses='',
+                           annotation_status='pending'))
+    cohort_count = len(expected)
+    assert cohort_count and {r['inchikey'] for r in inputs} == expected
     annotated = []
     for inp in inputs:
         r = lookup[inp['inchikey']]
@@ -103,11 +114,13 @@ def main():
         writer = csv.DictWriter(f, fieldnames=list(annotated[0]))
         writer.writeheader(); writer.writerows(annotated)
     counts = {g: sum(r['structure_group'] == g for r in annotated) for g in GROUPS}
-    assert sum(counts.values()) == 101 and all(counts.values())
+    assert sum(counts.values()) == cohort_count and all(counts.values())
     assert all(sha(ROOT / p) == h for p, h in hashes.items())
     report = {
-        'cohort_count': 101, 'unique_inchikeys': 101, 'smiles_parsed': 101,
-        'exact_regenerated_inchikey_matches': 101, 'excluded_rows': 0,
+        'cohort_count': cohort_count, 'unique_inchikeys': cohort_count, 'smiles_parsed': cohort_count,
+        'exact_regenerated_inchikey_matches': cohort_count, 'excluded_rows': 0,
+        'pending_use_review': sorted(expected - original.keys()),
+        'annotations_outside_current_cohort': sorted(original.keys() - expected),
         'rdkit_version': rdBase.rdkitVersion, 'source_hashes': hashes,
         'group_counts': counts, 'group_labels': GROUPS,
         'classification_scope': 'Mutually exclusive structure-based display groups for this cohort only',
@@ -124,7 +137,8 @@ def main():
         'display_order': 'Alphabetical names within structural groups; grouping order is for layout, not rank',
     }
     (DATA / 'classification.json').write_text(json.dumps(report, indent=2, ensure_ascii=False)+'\n')
-    print(json.dumps({'cohort': 101, 'exact_identity_matches': 101, 'groups': counts}))
+    print(json.dumps({'cohort': cohort_count, 'exact_identity_matches': cohort_count, 'groups': counts,
+                      'pending_use_review': len(expected - original.keys())}))
 
 if __name__ == '__main__':
     main()

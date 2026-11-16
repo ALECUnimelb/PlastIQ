@@ -1,20 +1,20 @@
 # 图表清单
 
-每个图号只有一套当前文件。状态由本表记录，生成新版替换同名文件，不保留并行正式/待审目录。
+当前数据：PBMT 三档评分与 exposure 直接赋分规则（0、1、2）。数值图已重新生成，待审阅。
+三张导入图片及手工 PPT 保留原样，仍需更新/复核；Dashboard 规则版与线上数据尚未验收。
 
-| 图 | 当前状态 | 文件 | 说明 |
-|---|---|---|---|
-| Fig1 | 待审 | [PNG](../result/figures/Fig1.png) · [PDF](../result/figures/Fig1.pdf) | 新权重、分别取整和五级说明，待审 |
-| Fig2 | 待审 | [PNG](../result/figures/Fig2.png) · [PDF](../result/figures/Fig2.pdf) | 证据统计复核一致，待审 |
-| Fig3 | 已确认 | [PNG](../result/figures/Fig3.png) · [PDF](../result/figures/Fig3.pdf) | 已确认，可用于新稿 |
-| Fig4 | 已确认 | [PNG](../result/figures/Fig4.png) · [PDF](../result/figures/Fig4.pdf) | Level 1 用途、结构与监管三联图，已确认；旧敏感性分析已留档 |
-| Fig5 | 已确认 | [PNG](../result/figures/Fig5.png) · [PDF](../result/figures/Fig5.pdf) | 五级分类权重与阈值敏感性，已确认；图内文字精简，方法见图注 |
-| ExtendedDataFig1 | 待审 | [PNG](../result/figures/ExtendedDataFig1.png) · [PDF](../result/figures/ExtendedDataFig1.pdf) | 来源及交集统计一致，对齐检查通过，待审 |
-| ExtendedDataFig2 | 待审 | [PNG](../result/figures/ExtendedDataFig2.png) · [PDF](../result/figures/ExtendedDataFig2.pdf) | 证据可用性及正分交集一致，待审 |
-| ExtendedDataFig3 | 已确认 | [PNG](../result/figures/ExtendedDataFig3.png) · [PDF](../result/figures/ExtendedDataFig3.pdf) | 已确认，可用于新稿 |
-| ExtendedDataFig4 | 旧版，待更新 | [PNG](../result/figures/ExtendedDataFig4.png) | 等待 Dashboard 更新 |
+| 图 | 状态 | 文件 |
+|---|---|---|
+| Fig. 1 | 新数据，待审阅 | [PNG](../result/figures/Fig1.png) · [PDF](../result/figures/Fig1.pdf) |
+| Fig. 2 | 新数据，待审阅 | [PNG](../result/figures/Fig2.png) · [PDF](../result/figures/Fig2.pdf) |
+| Fig. 3 | 新数据，待审阅 | [PNG](../result/figures/Fig3.png) · [PDF](../result/figures/Fig3.pdf) |
+| Fig. 4 | 新数据，待审阅 | [PNG](../result/figures/Fig4.png) · [PDF](../result/figures/Fig4.pdf) |
+| Extended Data Fig. 1 | 旧图片，待更新/复核 | [PNG](../result/figures/ExtendedDataFig1.png) |
+| Extended Data Fig. 2 | 新数据，待审阅 | [PNG](../result/figures/ExtendedDataFig2.png) · [PDF](../result/figures/ExtendedDataFig2.pdf) |
+| Extended Data Fig. 3 | 新数据，待审阅 | [PNG](../result/figures/ExtendedDataFig3.png) · [PDF](../result/figures/ExtendedDataFig3.pdf) |
+| Extended Data Fig. 4 | 新数据，待审阅 | [PNG](../result/figures/ExtendedDataFig4.png) · [PDF](../result/figures/ExtendedDataFig4.pdf) |
+| Extended Data Fig. 5 | 旧图片，待更新/复核 | [PNG](../result/figures/ExtendedDataFig5.png) |
+| Extended Data Fig. 6 | 旧图片，待更新/复核 | [PNG](../result/figures/ExtendedDataFig6.png) |
 
-五级分类仅在绘图层派生，当前 CSV 和 SQLite 的评分排名未改变。
-
-明确保留：Level1_identity（名单）、Level1_classification_tree（分类树）、Sensitivity_analysis（旧敏感性分析）。
-所有图片位于 `result/figures/`，数据位于 `result/figure_data/`，唯一审阅 PPT 位于 `result/`，保留用户命名。
+保留的名单、分类树和 SI 表已同步。Sensitivity_analysis 为保留的历史基线图。
+每个图号仅保留一套当前图片，数据及配套表位于 `result/`。

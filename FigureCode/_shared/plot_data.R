@@ -2,6 +2,8 @@
 save_plot_data <- function(values) {
   stopifnot(Sys.getenv('PLASTPRIOR_FIGURE_PHASE') == 'prepare')
   dir.create(file.path(output_dir,'source_data'),recursive=TRUE,showWarnings=FALSE)
+  if (exists('three_level_pbmt')) values$three_level_pbmt <- three_level_pbmt
+  if (exists('three_level_exposure')) values$three_level_exposure <- three_level_exposure
   saveRDS(values,file.path(output_dir,'source_data/plot_data.rds'),version=3)
 }
 load_plot_data <- function() {

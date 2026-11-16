@@ -15,7 +15,7 @@ bar_panel <- function(tbl,tag,title,left,title_y,x0,w,ys,axis_y,xmax,ticks,colou
  for(j in seq_len(nrow(tbl))) {
   text(tbl$label[j],x0-3,ys[j],11.5,just='right')
   grid.rect(x=unit(x0,'mm'),y=unit(ys[j],'mm'),width=unit(w*tbl$n[j]/xmax,'mm'),height=unit(6,'mm'),
-   just=c('left','centre'),gp=gpar(fill=colour,col=NA))
+   just=c('left','centre'),gp=gpar(fill=if(tbl$category[j]=='Pending use review') '#AEB7C2' else colour,col=NA))
   text(tbl$n[j],x0+w*tbl$n[j]/xmax+2,ys[j],11.5)
  }
  line(x0,axis_y,x0+w,axis_y)
@@ -28,9 +28,12 @@ bar_panel <- function(tbl,tag,title,left,title_y,x0,w,ys,axis_y,xmax,ticks,colou
 }
 draw <- function() {
  grid.newpage()
- bar_panel(use,'a','Primary uses',6,234,77,67,seq(217,32,length.out=16),22,30,c(0,10,20,30),'#347681')
- bar_panel(structure,'b','Structural classes',163,234,239,68,seq(217,125,length.out=9),115,35,c(0,10,20,30),'#687FA9')
- bar_panel(reg,'c','GIC regulatory annotations',163,95,239,68,seq(80,32,length.out=5),22,50,c(0,10,20,30,40,50),'#786086')
+ use_max <- max(30,ceiling(max(use$n)/10)*10)
+ structure_max <- max(35,ceiling(max(structure$n)/10)*10)
+ reg_max <- max(50,ceiling(max(reg$n)/10)*10)
+ bar_panel(use,'a','Primary uses',6,234,77,67,seq(217,32,length.out=nrow(use)),22,use_max,seq(0,use_max,10),'#347681')
+ bar_panel(structure,'b','Structural classes',163,234,239,68,seq(217,125,length.out=nrow(structure)),115,structure_max,seq(0,structure_max,10),'#687FA9')
+ bar_panel(reg,'c','GIC regulatory annotations',163,95,239,68,seq(80,32,length.out=nrow(reg)),22,reg_max,seq(0,reg_max,10),'#786086')
 }
 for(fmt in c('pdf','png')) {
  p <- file.path(output_dir,paste0('Fig4.',fmt))

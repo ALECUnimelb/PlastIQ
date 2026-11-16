@@ -5,67 +5,79 @@
       "managed": true,
       "formal": "legacy",
       "review": true,
-      "note": "新权重、分别取整和五级说明，待审"
+      "note": "保留稿件导入图片；尚未按新评分数据复核或更新",
+      "publication_mode": "manuscript_asset",
+      "entrypoint": "FigureCode/run_plot.py --figure ExtendedDataFig1"
     },
     "Fig2": {
       "managed": true,
-      "formal": "legacy",
+      "formal": "current",
       "review": true,
-      "note": "证据统计复核一致，待审"
+      "note": "PBMT 三档及 exposure 直接赋分规则数据已更新；图表待审阅"
     },
     "Fig3": {
       "managed": true,
       "formal": "current",
-      "review": false,
-      "note": "已确认，可用于新稿"
+      "review": true,
+      "note": "PBMT 三档及 exposure 直接赋分规则数据已更新；图表待审阅"
     },
     "Fig4": {
       "managed": true,
       "formal": "current",
-      "review": false,
-      "note": "Level 1 用途、结构与监管三联图，已确认；旧敏感性分析已留档",
-      "publication_mode": "approved_asset_import",
+      "review": true,
+      "note": "PBMT 三档及 exposure 直接赋分规则数据已更新；图表待审阅",
+      "publication_mode": "rendered",
       "entrypoint": "FigureCode/Fig4/run_plot.py"
     },
     "Fig5": {
       "managed": true,
       "formal": "current",
-      "review": false,
+      "review": true,
       "entrypoint": "FigureCode/Fig5/run_plot.py",
-      "note": "五级分类权重与阈值敏感性，已确认；图内文字精简，方法见图注"
+      "note": "PBMT 三档及 exposure 直接赋分规则数据已更新；图表待审阅"
     },
     "ExtendedDataFig1": {
       "managed": true,
-      "formal": "legacy",
+      "formal": "current",
       "review": true,
-      "note": "来源及交集统计一致，对齐检查通过，待审"
+      "note": "PBMT 三档及 exposure 直接赋分规则数据已更新；图表待审阅"
     },
     "ExtendedDataFig2": {
       "managed": true,
-      "formal": "legacy",
+      "formal": "current",
       "review": true,
-      "note": "证据可用性及正分交集一致，待审"
+      "note": "PBMT 三档及 exposure 直接赋分规则数据已更新；图表待审阅"
     },
     "ExtendedDataFig3": {
       "managed": true,
       "formal": "current",
-      "review": false,
-      "note": "已确认，可用于新稿",
+      "review": true,
+      "note": "PBMT 三档及 exposure 直接赋分规则数据已更新；图表待审阅",
       "entrypoint": "FigureCode/ExtendedDataFig3/run_plot.py"
     },
     "ExtendedDataFig4": {
       "managed": false,
       "formal": "legacy",
-      "review": false,
-      "note": "等待 Dashboard 更新"
+      "review": true,
+      "note": "保留稿件导入图片；尚未按新评分数据复核或更新",
+      "publication_mode": "manuscript_asset",
+      "entrypoint": "FigureCode/run_plot.py --figure ExtendedDataFig5"
+    },
+    "DatabaseTimeline": {
+      "managed": false,
+      "formal": "legacy",
+      "review": true,
+      "publication_mode": "manuscript_asset",
+      "note": "保留稿件导入图片；尚未按新评分数据复核或更新",
+      "entrypoint": "FigureCode/run_plot.py --figure ExtendedDataFig6"
     }
   },
   "supplementary": {
     "SILevel1Evidence": {
-      "formal": "none",
+      "formal": "current",
       "review": true,
       "entrypoint": "FigureCode/Supplementary/SILevel1Evidence/run_plot.py",
-      "note": "101 个化合物，Excel 与完整 PDF 待审"
+      "note": "115 个化合物，Excel 与完整 PDF 待审"
     }
   },
   "exploratory": {}

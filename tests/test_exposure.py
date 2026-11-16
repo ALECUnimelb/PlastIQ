@@ -12,9 +12,9 @@ from plastprior.exposure import (
 
 class ExposureScoreTests(unittest.TestCase):
     def test_discrete_threshold_boundaries(self):
-        for dim, bands in [('inventory', [(1,.5),(2,1),(4,2)]),
-                           ('patent', [(1,.5),(1000,1),(10000,2)]),
-                           ('literature', [(1,.5),(5,1),(20,2)])]:
+        for dim, bands in [('inventory', [(1,1),(2,1),(4,2)]),
+                           ('patent', [(1,1),(1000,1),(10000,2)]),
+                           ('literature', [(1,1),(5,1),(20,2)])]:
             previous = 0.0
             for cutoff, score in bands:
                 self.assertEqual(threshold_score(Decimal(cutoff) - Decimal('0.0001'), dim), previous)
@@ -25,14 +25,14 @@ class ExposureScoreTests(unittest.TestCase):
                 self.assertIsNone(threshold_score(value, dim))
 
     def test_production_numeric_and_qualitative_priority(self):
-        for value, expected in [('0', 0), ('0.01', .5), ('999.999', .5), ('1000', 1), ('99999.999', 1), ('100000', 2)]:
+        for value, expected in [('0', 0), ('0.01', 1), ('999.999', 1), ('1000', 1), ('99999.999', 1), ('100000', 2)]:
             self.assertEqual(production_score(value, 'unknown'), expected)
-        self.assertEqual(production_score(0, 'confirmed_confidential_quantity'), .5)
-        self.assertEqual(production_score(None, 'historical_record'), .5)
+        self.assertEqual(production_score(0, 'confirmed_confidential_quantity'), 1)
+        self.assertEqual(production_score(None, 'historical_record'), 1)
         self.assertEqual(production_score(None, 'confirmed_zero_quantity'), 0)
         self.assertIsNone(production_score(None, 'not_found_in_source'))
         self.assertIsNone(production_score(-6, 'unknown'))
-        self.assertEqual(production_score(None, 'confirmed_record_no_public_quantity'), .5)
+        self.assertEqual(production_score(None, 'confirmed_record_no_public_quantity'), 1)
 
     def test_unqueryable_or_ambiguous_human_evidence_is_not_zero(self):
         valid = {'policy_version': reference.FCCHUMON_HUMAN_DETECTION_POLICY_VERSION,
@@ -112,3 +112,56 @@ class ExposureScoreTests(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class ExposureRuleScenarioTests(unittest.TestCase):
+    def record(self, **values):
+        from plastprior.scoring_scenarios import COMPONENT_MAXIMA
+        return {**dict.fromkeys(COMPONENT_MAXIMA, 0), 'inchikey': 'A',
+                'Exposure_inventory_listing_count': 1, 'Exposure_inventory_data_status': 'available',
+                'Exposure_patent_count': 1, 'Exposure_patent_data_status': 'available',
+                'Exposure_literature_count': 1, 'Exposure_literature_data_status': 'available',
+                'Exposure_scale_value_tonnes': .1, 'Exposure_scale_market_presence': 'unknown', **values}
+
+    def test_uses_raw_counts_not_previous_scores_and_is_repeatable(self):
+        from copy import deepcopy
+        from plastprior.scoring_scenarios import score_population, three_level_exposure_policy
+        row = self.record(Exposure_inventory_score=2, Exposure_patent_score=0,
+                          Exposure_literature_score=.5, Exposure_production_score=0)
+        before = deepcopy(row)
+        policy = three_level_exposure_policy()
+        result = score_population([row], policy)[0]
+        self.assertEqual(row, before)
+        for dimension in ['inventory','patent','literature','production']:
+            self.assertEqual(result[f'Exposure_{dimension}_score'], 1)
+            self.assertNotIn(f'Exposure_{dimension}_score_original', result)
+        self.assertEqual(result['Exposure_score'], 7)
+        self.assertEqual(score_population([result], policy)[0], result)
+        policy['exposure_weights']['Exposure_production_score'] = '0.5'
+        result = score_population([row], policy)[0]
+        self.assertEqual(Decimal(result['Exposure_score_raw']), Decimal('6.5'))
+        self.assertEqual(result['Exposure_score'], 7)
+
+    def test_missing_eligibility_and_qualitative_production(self):
+        from plastprior.scoring_scenarios import score_population, three_level_exposure_policy
+        row = self.record(Exposure_inventory_data_status='unavailable',
+                          Exposure_patent_data_status='unavailable', Exposure_literature_count=0,
+                          Exposure_scale_value_tonnes=None, Exposure_scale_market_presence='confirmed_confidential_quantity')
+        result = score_population([row], three_level_exposure_policy())[0]
+        self.assertIsNone(result['Exposure_inventory_score'])
+        self.assertIsNone(result['Exposure_patent_score'])
+        self.assertEqual(result['Exposure_literature_score'], 0)
+        self.assertEqual(result['Exposure_production_score'], 1)
+        self.assertEqual(result['Exposure_score'], 1)
+
+    def test_raw_inputs_required_and_old_policies_still_replay_original_scores(self):
+        from plastprior.scoring_scenarios import score_population, three_level_exposure_policy, three_level_policy, validate_policy
+        row = self.record(Exposure_inventory_score=.5)
+        self.assertEqual(score_population([row], three_level_policy())[0]['Exposure_inventory_score'], .5)
+        del row['Exposure_scale_market_presence']
+        with self.assertRaisesRegex(ValueError,'Missing selected exposure inputs'):
+            score_population([row], three_level_exposure_policy())
+        with self.assertRaises(ValueError):
+            validate_policy({**three_level_exposure_policy(), 'exposure_score_policy':'unknown'})
+        with self.assertRaises(ValueError):
+            score_population([self.record(Exposure_patent_data_status='available', Exposure_patent_count='bad')],three_level_exposure_policy())

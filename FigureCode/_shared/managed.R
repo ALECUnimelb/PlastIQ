@@ -13,6 +13,15 @@ lock <- jsonlite::fromJSON(file.path(figures_dir,'managed_sources.json'),simplif
 figure_policy <- jsonlite::fromJSON(file.path(repo_root,lock$policy$path),simplifyVector=FALSE)
 db <- NULL
 if (Sys.getenv("PLASTPRIOR_FIGURE_PHASE") == "prepare") db <- DBI::dbConnect(RSQLite::SQLite(),file.path(repo_root,lock$files$analysis$path),flags=RSQLite::SQLITE_RO)
+three_level_pbmt <- FALSE
+three_level_exposure <- FALSE
+if (!is.null(db)) {
+  scoring_policy <- jsonlite::fromJSON(DBI::dbGetQuery(db,"SELECT value_json FROM scenario_metadata WHERE key='policy'")$value_json)
+  mapping <- scoring_policy$hazard_score_mapping
+  if (!is.null(mapping) && !identical(mapping,'pbmt-three-level-v1')) stop('Unsupported PBMT mapping')
+  three_level_pbmt <- identical(mapping,'pbmt-three-level-v1')
+  three_level_exposure <- identical(scoring_policy$exposure_score_policy,'exposure-three-level-rules-v1')
+}
 config <- if(file.exists(file.path(module_dir,'figure.yml'))) jsonlite::fromJSON(file.path(module_dir,'figure.yml'),simplifyVector=FALSE) else NULL
 level_for <- function(h,e) {
   h <- suppressWarnings(as.numeric(h)); e <- suppressWarnings(as.numeric(e))
@@ -22,7 +31,9 @@ level_for <- function(h,e) {
   as.integer(matrix_levels[cbind(findInterval(h,cuts)+1L,findInterval(e,cuts)+1L)])
 }
 apply_figure_levels <- function(frame) {
-  frame$Priority_level <- level_for(frame$Hazard_score,frame$Exposure_score)
+  calculated <- level_for(frame$Hazard_score,frame$Exposure_score)
+  if ('Priority_level' %in% names(frame) && !all(calculated==as.integer(frame$Priority_level))) stop('Figure levels disagree with the source dataset')
+  frame$Priority_level <- calculated
   frame$Priority_tier <- paste('Level',frame$Priority_level)
   frame
 }

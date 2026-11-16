@@ -165,7 +165,7 @@
     "patent": [
       [
         1,
-        0.5
+        1
       ],
       [
         1000,
@@ -179,7 +179,7 @@
     "literature": [
       [
         1,
-        0.5
+        1
       ],
       [
         5,
@@ -193,7 +193,7 @@
     "inventory": [
       [
         1,
-        0.5
+        1
       ],
       [
         2,
@@ -207,7 +207,7 @@
   },
   "rules": {
     "missingness": "Unavailable components remain null and contribute zero to the exposure total. Joint food-contact/biomonitoring contributions add independently. Completeness and missingness are reported separately without renormalisation.",
-    "production": "Select the historical maximum among Stage 6A numeric-eligible records. Upper bound precedes lower bound; retain original value-status/year/record and metric/source tie-breaks. No summation or annualisation. Eligible positive qualitative evidence supplies 0.5 when the numeric score is zero or unavailable.",
+    "production": "Select the historical maximum among Stage 6A numeric-eligible records. Upper bound precedes lower bound; retain original value-status/year/record and metric/source tie-breaks. No summation or annualisation. Eligible positive qualitative evidence supplies 1 when the numeric score is zero or unavailable.",
     "patent": "Retain the maximum valid curated/PubChemLite count without summing; use a validated external zero-baseline correction only when eligible. A failed correction with no positive fallback remains unavailable; cached zero alone does not certify a successful zero-correction query.",
     "literature": "Only eligible PubMed title/abstract query hits enter the literature component; LitChemPlast counts remain auxiliary.",
     "gic": "Use Stage 6A direct-support eligibility and industrial tags; name-only associations are unavailable. Completed no-match gives zero for this inventory proxy only. Preserve metadata limitations.",
@@ -215,5 +215,5 @@
     "historical": "Recompute all 63 historical exposure fields including source selections and recursive evidence JSON. The supplementary official EPA table is a frozen derived input; original archive transformations are not rerun.",
     "human_detection": "A completed valid-CAS no-match is zero for the source-detection indicator. Missing/invalid query CAS, a rejected ambiguous CAS association, or absent resolution policy is unavailable; membership is not detection."
   },
-  "policy_version": "exposure-zero-contribution-v1"
+  "policy_version": "exposure-three-level-rules-v1"
 }

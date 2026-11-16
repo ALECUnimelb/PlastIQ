@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "description": "Publication numbers are separate from stable implementation/data IDs. Do not rename numerical inputs or database keys when reordering.",
+  "figures": [
+    {"id": "Fig2", "name": "Fig1", "label": "Fig. 1", "title": "PBMT coverage and concordance"},
+    {"id": "Fig3", "name": "Fig2", "label": "Fig. 2", "title": "Priority landscape and evidence profiles"},
+    {"id": "ExtendedDataFig3", "name": "Fig3", "label": "Fig. 3", "title": "GIC regulatory concordance"},
+    {"id": "Fig5", "name": "Fig4", "label": "Fig. 4", "title": "Weight and threshold sensitivity"},
+    {"id": "Fig1", "name": "ExtendedDataFig1", "label": "Extended Data Fig. 1", "title": "Database assembly and use", "asset": true},
+    {"id": "ExtendedDataFig1", "name": "ExtendedDataFig2", "label": "Extended Data Fig. 2", "title": "Inventory assembly and source overlap"},
+    {"id": "ExtendedDataFig2", "name": "ExtendedDataFig3", "label": "Extended Data Fig. 3", "title": "PBMT and exposure evidence patterns"},
+    {"id": "Fig4", "name": "ExtendedDataFig4", "label": "Extended Data Fig. 4", "title": "Level 1 uses, structures and regulatory profiles"},
+    {"id": "ExtendedDataFig4", "name": "ExtendedDataFig5", "label": "Extended Data Fig. 5", "title": "Compound evidence dashboard", "asset": true},
+    {"id": "DatabaseTimeline", "name": "ExtendedDataFig6", "label": "Extended Data Fig. 6", "title": "Database timeline", "asset": true}
+  ]
+}

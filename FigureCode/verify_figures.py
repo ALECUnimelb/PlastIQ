@@ -12,6 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT/'FigureCode/_shared'))
 from managed import code_hashes, paths_for, sha, verify_sources
 from result_paths import relocated, verify_code, verify_digest, manifest_path, artifact_path, receipt
+from publication import entries, entry, output_name, verify_asset
 
 
 def verify_manifest(figure, state, current, profile, legacy, relocations, working_snapshot=True):
@@ -105,8 +106,9 @@ def verify_policy(profile):
             for domain, score in [('Hazard', h), ('Exposure', e)]:
                 assert Decimal(row[f'{domain}_score_raw']).quantize(Decimal('1'), rounding=ROUND_HALF_UP) == score
             assert Decimal(row['Priority_score']) == h+e
+            assert int(row['Priority_level']) == level(h,e), 'Stored level differs from independently calculated level'
             counts[level(h, e)] += 1
-    assert [counts[i] for i in range(1, 6)] == policy['expected_counts']
+    assert sum(counts.values()) == profile['total']
     return dict(sorted(counts.items()))
 
 
@@ -117,13 +119,19 @@ def main():
         assert sha(ROOT/item['path']) == item['sha256'], ('legacy source', item['path'])
     full_catalog = json.loads((ROOT/'FigureCode/catalog.json').read_text())
     catalog = full_catalog['figures']
+    assert {row['id'] for row in entries()} == set(catalog), 'Publication order/catalog mismatch'
     ledger = ROOT/'audit_archive/workspace_migration_20261026/code_relocations.json'
     relocations = json.loads(ledger.read_text()) if ledger.exists() else {}
     report = {'passed': True, 'run_id': profile['run_id'], 'level_counts': verify_policy(profile), 'figures': {}}
     for figure, item in catalog.items():
+        if entry(figure).get('asset'):
+            imported=verify_asset(figure)
+            assert imported['status'] == ('review' if item['review'] else 'approved')
+            report['figures'][figure]={'publication':entry(figure)['label'], 'review':item['review'], 'source':'imported manuscript raster'}
+            continue
         state = 'review' if item['review'] else 'output'
         manifest = verify_manifest(figure,state,item['review'] or item['formal']=='current',profile,legacy,relocations)
-        record = {'formal':item['formal'],'review':item['review']}
+        record = {'publication':entry(figure)['label'],'formal':item['formal'],'review':item['review']}
         if (item['review'] or item['formal'] == 'current') and figure in {'Fig2', 'ExtendedDataFig1', 'ExtendedDataFig2'}:
             record['unchanged_evidence_tables'] = verify_unchanged_evidence(figure, manifest, legacy)
         if figure == 'Fig4' and item['formal'] == 'current' and not item['review'] and item.get('publication_mode') == 'approved_asset_import':
@@ -147,8 +155,9 @@ def main():
         report['supplementary'][name]=states
     expected=set()
     for name in catalog:
-        record=json.loads(manifest_path(name).read_text())
-        expected.update(n for n in record['outputs'] if Path(n).suffix in {'.png','.pdf','.xlsx'})
+        record=verify_asset(name) if entry(name).get('asset') else json.loads(manifest_path(name).read_text())
+        retired=receipt().get('layout_cleanup',{}).get('retired_outputs',{}).get(name,{})
+        expected.update(output_name(name,n) for n in record['outputs'] if Path(n).suffix in {'.png','.pdf','.xlsx'} and n not in retired)
     for name in full_catalog.get('supplementary',{}):
         expected.update(json.loads(manifest_path(name).read_text())['outputs'])
     for name in ['Level1Identity','Level1IdentityTree']:

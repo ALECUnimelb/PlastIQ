@@ -58,10 +58,10 @@ def prepare(result, publication=None):
         if member['Figure_priority_level'] != '1':
             raise ValueError('Invalid figure level.')
     payload = {'members': members}
-    for key, field, size in [('use', 'primary_use', 16), ('structure', 'structure_group', 9), ('reg', 'GIC_regulatory_status', 5)]:
+    for key, field in [('use', 'primary_use'), ('structure', 'structure_group'), ('reg', 'GIC_regulatory_status')]:
         rows = read_rows(source / (key + '_counts.csv'))
         counts = Counter(m[field] for m in members)
-        if len(rows) != size or len({r['category'] for r in rows}) != size or set(counts) != {r['category'] for r in rows}:
+        if len(rows) != len(counts) or len({r['category'] for r in rows}) != len(counts) or set(counts) != {r['category'] for r in rows}:
             raise ValueError('Unexpected Fig. 4 categories: ' + key)
         if any(not r['label'] or int(r['n']) != counts[r['category']] for r in rows):
             raise ValueError('Fig. 4 counts differ from member annotations: ' + key)

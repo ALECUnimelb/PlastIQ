@@ -1,10 +1,11 @@
 #!/usr/bin/env Rscript
-# A categorical radial tree: Level 1 -> nine structure groups -> 101 compounds.
+# A categorical radial tree: Level 1 -> nine structure groups -> current cohort.
 # Membership only: branch length, angular position and colour encode no ranking
 # or molecular similarity. R/grid drawing, Arial, editable PDF/SVG, 600 dpi PNG.
 # width_mm = 380, height_mm = 380: a full-name review figure, not a reduced print.
 suppressPackageStartupMessages(library(grid))
-root <- '/Users/ruiwang/Projects/APPs/PlastPrior'
+script <- normalizePath(sub('^--file=','',grep('^--file=',commandArgs(FALSE),value=TRUE)[1]))
+root <- dirname(dirname(dirname(dirname(script))))
 source(file.path(root,'FigureCode/_shared/result_paths.R'))
 module <- file.path(root,'FigureCode/Supplementary/Level1IdentityTree')
 args <- commandArgs(trailingOnly=TRUE)
@@ -21,7 +22,7 @@ report <- jsonlite::fromJSON(file.path(data_dir,'classification.json'))
 sha <- function(p) digest::digest(file=p,algo='sha256',serialize=FALSE)
 input_hash <- sha(file.path(data_dir,'compound_identity.csv'))
 for(p in names(report$source_hashes)) stopifnot(sha(relocated_result_path(root,p))==report$source_hashes[[p]])
-stopifnot(nrow(d)==101L,!anyDuplicated(d$inchikey),all(d$inchikey==d$regenerated_inchikey))
+stopifnot(nrow(d)==report$cohort_count,!anyDuplicated(d$inchikey),all(d$inchikey==d$regenerated_inchikey))
 groups <- c('hal_non_aromatic','hal_aromatic_chx','hal_aromatic_o','hal_aromatic_ns','hal_heterocycle',
             'nonhal_aromatic_ch','nonhal_o','nonhal_heterocycle','nonhal_other')
 colours <- setNames(c('#3A7582','#687FA9','#947BAC','#AA8650','#A45F62','#658B66','#B18B60','#8C7E71','#73848F'),groups)
@@ -76,7 +77,7 @@ readr::write_csv(ordered,file.path(tree_data,'tree_leaves.csv'))
 edges <- rbind(data.frame(parent='Level 1',child=unname(codes),kind='cohort_to_group'),
                data.frame(parent=ordered$tree_group_code,child=ordered$record_id,kind='group_to_compound'))
 readr::write_csv(edges,file.path(tree_data,'tree_edges.csv'))
-stopifnot(nrow(edges)==110L,setequal(ordered$inchikey,d$inchikey),!anyDuplicated(ordered$inchikey))
+stopifnot(nrow(edges)==nrow(d)+length(groups),setequal(ordered$inchikey,d$inchikey),!anyDuplicated(ordered$inchikey))
 point <- function(r,t) c(centre+r*cos(t),centre+r*sin(t))
 # Check rotated text bounding rectangles using a separating-axis intersection test.
 label_polygons <- lapply(seq_len(nrow(ordered)),function(i) {
@@ -96,7 +97,7 @@ intersect <- function(a,b) {
  TRUE
 }
 collisions<-list()
-for(i in 1:100) for(j in (i+1):101) if(intersect(label_polygons[[i]],label_polygons[[j]])) collisions[[length(collisions)+1]]<-c(i,j)
+for(i in seq_len(nrow(d)-1L)) for(j in seq.int(i+1L,nrow(d))) if(intersect(label_polygons[[i]],label_polygons[[j]])) collisions[[length(collisions)+1]]<-c(i,j)
 label_bounds<-range(unlist(label_polygons))
 stopifnot(length(collisions)==0L,label_bounds[1]>2,label_bounds[2]<width_mm-2)
 stroke <- function(x,y,col,lwd=1) grid.lines(x=unit(x,'mm'),y=unit(y,'mm'),gp=gpar(col=col,lwd=lwd,lineend='round'))
@@ -136,7 +137,7 @@ draw <- function() {
  grid.circle(x=unit(centre,'mm'),y=unit(centre,'mm'),r=unit(68,'mm'),
              gp=gpar(fill='white',col='#E4E9EB',lwd=.65))
  txt('Level 1',centre,centre+47,18,face='bold')
- txt('101 compounds',centre,centre+38.5,12,col='#697780')
+ txt(paste(nrow(d),'compounds'),centre,centre+38.5,12,col='#697780')
  for(j in seq_along(groups)) {
   g<-groups[j];y<-centre+26-(j-1)*7.3
   grid.circle(x=unit(centre-54,'mm'),y=unit(y,'mm'),r=unit(2.3,'mm'),gp=gpar(fill=colours[g],col=NA))
@@ -154,14 +155,14 @@ for(fmt in c('pdf','svg','png','preview.png')) {
  tryCatch(draw(),finally=grDevices::dev.off())
 }
 stopifnot(sha(file.path(data_dir,'compound_identity.csv'))==input_hash)
-writeLines(c('Structure-based classification tree of 101 Level 1 compounds.',
- 'The central cohort connects to nine structure-based display groups (A–I), each of which connects to its member compounds. Each outer point represents one unique InChIKey; all 101 full names are shown. Group definitions and names are identical to the accompanying approved identity list. Counts appear in the central key.',
+writeLines(c(sprintf('Structure-based classification tree of %d Level 1 compounds.',nrow(d)),
+ 'The central cohort connects to nine structure-based display groups (A–I), each of which connects to its member compounds. Each outer point represents one unique InChIKey; all full names are shown. Group definitions and names are identical to the accompanying identity list. Counts appear in the central key.',
  'This is a categorical membership tree, not a molecular similarity network, clustering dendrogram or phylogeny. Branch lengths, angles and point positions do not encode risk, rank, similarity or quantitative distance. Angular spacing allows complete names to remain legible; it is not a proportional composition chart. Leaf order is alphabetical within each group.',
  'X denotes F, Cl, Br or I. The mutually exclusive assignment rules are preserved in the accompanying classification.json; the structures all regenerate their supplied InChIKeys. Original scores, ranks, Level 1 membership and the liked list figure are unchanged.',
  'The 380 x 380 mm full-name version uses 11.5 pt outer names and 10.5 pt central group labels. Long names wrap and angular spacing is reallocated to avoid overlap. Final manuscript sizing requires reflow rather than direct reduction.'),file.path(out,'captions.txt'))
 outputs<-list.files(out,full.names=TRUE);outputs<-outputs[basename(outputs)!='manifest.json' & !dir.exists(outputs)]
 jsonlite::write_json(list(status='review',backend='R',width_mm=380,height_mm=380,body_font_pt=body_size,
- cohort_count=101,group_count=9,edge_count=110,source_data_hash=input_hash,
+ cohort_count=nrow(d),group_count=9,edge_count=nrow(d)+length(groups),source_data_hash=input_hash,
  label_rectangle_overlaps=length(collisions),label_bounds_mm=label_bounds,
  group_counts=report$group_counts,source_scores_ranks_unchanged=TRUE,
  angular_spacing='text-height-aware; not quantitative',classification=report,
@@ -170,4 +171,4 @@ jsonlite::write_json(list(status='review',backend='R',width_mm=380,height_mm=380
  qa_notes=c('R source parses by execution','380 mm full-name review width explicitly selected',
  'Body text 11.5 pt, central labels 10.5 pt; editable vector and 600 dpi PNG; TIFF not requested')),
  file.path(out,'manifest.json'),auto_unbox=TRUE,pretty=TRUE)
-cat('Rendered 101 labelled leaves, 9 groups and 110 categorical edges.\n')
+cat(sprintf('Rendered %d labelled leaves, %d groups and %d categorical edges.\n',nrow(d),length(groups),nrow(d)+length(groups)))

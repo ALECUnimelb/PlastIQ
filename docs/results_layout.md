@@ -32,8 +32,8 @@ together. Layout/storage maintenance must not recalculate scores or ranks.
 
 Run `.venv/bin/python FigureCode/verify_figures.py` for scientific/provenance checks,
 and `node FigureCode/update_ppt.mjs` for the fixed presentation. It uses current
-catalog status and never auto-approves a figure. The deck contains only Fig. 1–5
-and Extended Data Fig. 1–4 (nine slides). Standalone Fig. 3b, SI evidence pages,
+catalog status and never auto-approves a figure. The deck contains only Fig. 1–4
+and Extended Data Fig. 1–6 (ten slides). Standalone Fig. 3b, SI evidence pages,
 identity/tree figures and old sensitivity plots are excluded from the deck.
 Temporary QA renders are removed.
 No `output/`, `results`, dated result directories or extra PPTs are created.
@@ -45,3 +45,11 @@ in `FigureCode/Supplementary/`. Numerical preparation is explicit through
 render commands consume that prepared set. The R payload is kept with its CSV
 tables, with provenance in `_metadata/<figure>/preparation.json`. Changed inputs
 mark existing images stale until rebuilt. Layout-only work does not run preparation.
+
+Publication numbers are defined in `FigureCode/publication_order.json`. Internal
+module/data/metadata IDs and database evidence keys remain stable. Use
+`FigureCode/run_plot.py --figure <current publication name>` to render. The workflow,
+dashboard and timeline are pinned manuscript raster imports stored under
+`_dependencies/manuscript_assets/`, with separate source records and review status.
+Renumbering reuses existing numerical data and removes superseded public filenames
+only after the complete replacement set passes verification.

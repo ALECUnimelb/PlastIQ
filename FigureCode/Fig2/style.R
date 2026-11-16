@@ -13,8 +13,24 @@ pbmt_agreement_levels <- c(
 pbmt_plastchem_score_levels <- c(0, 0.25, 0.5, 1, 2)
 pbmt_computational_score_levels <- c(0, 0.5, 1, 2)
 
+# Use the dataset's explicit policy, never infer it from observed score values.
+configure_pbmt_scale <- function() {
+  if (isTRUE(three_level_pbmt)) {
+    pbmt_plastchem_score_levels <<- c(0,1,2)
+    pbmt_computational_score_levels <<- c(0,1,2)
+    pbmt_agreement_levels <<- c('Exact','One-level difference','Two-level difference')
+  } else {
+    pbmt_plastchem_score_levels <<- c(0,0.25,0.5,1,2)
+    pbmt_computational_score_levels <<- c(0,0.5,1,2)
+    pbmt_agreement_levels <<- c('Exact','Near non-exact (<=0.5)','Moderate (0.5-1)','Large (>1)')
+  }
+}
+
 pbmt_named_palette <- function(config, field) {
   values <- unlist(config[[field]], use.names = TRUE)
+  if (identical(field,'agreement_palette') && isTRUE(three_level_pbmt)) {
+    values <- setNames(unname(values[c('Exact','Moderate (0.5-1)','Large (>1)')]),pbmt_agreement_levels)
+  }
   stats::setNames(as.character(values), names(values))
 }
 

@@ -7,6 +7,7 @@ from functools import lru_cache
 from pathlib import Path
 import hashlib
 import json
+from publication import output_name
 
 ROOT = Path(__file__).resolve().parents[2]
 RESULT = ROOT / 'result'
@@ -55,7 +56,7 @@ def manifest_path(figure):
 
 def artifact_path(figure, name):
     if Path(name).suffix in {'.png','.pdf','.xlsx'}:
-        return RESULT / 'figures' / name
+        return RESULT / 'figures' / output_name(figure, name)
     return manifest_path(figure).parent / name
 
 
@@ -76,6 +77,7 @@ def verify_digest(path, expected):
                receipt().get('code_layout', {}).get('code_transitions', {})]
     # Later figure adoptions append transitions without rewriting historical hashes.
     ledgers += [item.get('code_transitions', {}) for item in receipt().get('figure_adoptions', {}).values()]
+    ledgers.append(receipt().get('publication_numbering', {}).get('code_transitions', {}))
     ledger = ROOT/'audit_archive/workspace_migration_20261026/code_relocations.json'
     if ledger.exists(): ledgers.append(json.loads(ledger.read_text()))
     for ledger in ledgers:
@@ -96,7 +98,8 @@ def verify_code(expected, actual):
         if name in actual: assert digest(resolve(name)) == actual[name]
     additions = {**receipt().get('storage_migration', {}).get('added_code', {}),
                  **receipt().get('layout_cleanup', {}).get('added_code', {}),
-                 **receipt().get('code_layout', {}).get('added_code', {})}
+                 **receipt().get('code_layout', {}).get('added_code', {}),
+                 **receipt().get('publication_numbering', {}).get('added_code', {})}
     additions = {relocated(k):v for k,v in additions.items()}
     for name in set(actual)-set(expected):
         assert name in additions, (name, 'unrecorded build source')

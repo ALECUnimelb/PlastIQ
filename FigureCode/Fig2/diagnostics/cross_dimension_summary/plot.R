@@ -22,7 +22,7 @@ plot_pbmt_cross_dimension_summary <- function(source_data, config, variant) {
     ""
   )
   agreement$label_colour <- ifelse(
-    agreement$agreement_band %in% c("Exact", "Large (>1)"), "white", "#222222"
+    agreement$agreement_band %in% c("Exact", "Large (>1)", "Two-level difference"), "white", "#222222"
   )
   metrics$dimension <- factor(metrics$dimension, levels = dimension_levels)
   metrics$metric_label <- paste0(
@@ -56,7 +56,7 @@ plot_pbmt_cross_dimension_summary <- function(source_data, config, variant) {
     ggplot2::scale_fill_manual(
       values = palette,
       breaks = pbmt_agreement_levels,
-      labels = c("Exact", "Near non-exact (≤0.5)", "Moderate (0.5–1)", "Large (>1)"),
+      labels = if (isTRUE(three_level_pbmt)) pbmt_agreement_levels else c("Exact", "Near non-exact (≤0.5)", "Moderate (0.5–1)", "Large (>1)"),
       drop = FALSE
     ) +
     ggplot2::scale_colour_identity() +

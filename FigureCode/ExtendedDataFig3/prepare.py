@@ -9,7 +9,7 @@ import sys
 import numpy as np
 import pandas as pd
 
-ROOT = Path('/Users/ruiwang/Projects/APPs/PlastPrior')
+ROOT = Path(__file__).resolve().parents[2]
 MODULE = ROOT / 'FigureCode/ExtendedDataFig3'
 sys.path.insert(0, str(ROOT / 'FigureCode/_shared'))
 from managed import verify_sources, sha, write_json
@@ -109,7 +109,8 @@ def main(stage):
     assert np.array_equal(scenarios[0]['h'],data.Hazard_score)
     assert np.array_equal(scenarios[0]['e'],data.Exposure_score)
     assert np.array_equal(scenarios[0]['score'],data.Priority_score)
-    assert np.bincount(scenarios[0]['level'],minlength=6)[1:].tolist()==five['expected_counts']
+    assert np.array_equal(scenarios[0]['level'], data.Priority_level)
+    baseline_counts = np.bincount(scenarios[0]['level'],minlength=6)[1:].tolist()
     add('hazard_only','Hazard only','reference',rank_mode='hazard')
     add('exposure_only','Exposure only','reference',rank_mode='exposure')
     add('no_inventory','Integrated, no inventory','reference',changes={'Exposure_inventory_score':0})
@@ -184,7 +185,7 @@ def main(stage):
       endpoint_definition='Primary: prohibited_or_phaseout OR restricted_or_authorisation_required; secondary additionally includes candidate_or_high_concern.',
       design='Fixed 1/5/10% budgets, +/-20% one-at-a-time weights, and four ranking references. Displayed screening budget: 5%. No optimization against GIC.',
       qa=dict(scenarios=len(scenarios),records_per_scenario=len(data),decimal_score_checks=len(scenarios)*len(data)*2,
-              baseline_exact=True,baseline_five_level_counts=five['expected_counts'],excluded_compounds=0,
+              baseline_exact=True,baseline_five_level_counts=baseline_counts,excluded_compounds=0,
               independent_capture_checks=len(scenarios)*3*2,source_unchanged=True))
     write_json(stage/'caption_facts.json',config)
     write_json(tables/'scenario_definitions.json',configs)

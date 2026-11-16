@@ -38,6 +38,10 @@ def verify_sources():
     return source
 
 def run(folder):
+    from publication import entry, publish_asset
+    if entry(folder.name) and entry(folder.name).get('asset'):
+        argparse.ArgumentParser(description='Publish the pinned manuscript raster.').parse_args()
+        return publish_asset(folder.name)
     parser = argparse.ArgumentParser(description=__doc__)
     # Destinations are fixed; alternate/versioned paths are intentionally unsupported.
     if folder.name == 'ExtendedDataFig4':

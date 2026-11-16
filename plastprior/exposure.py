@@ -45,12 +45,39 @@ def production_score(value, presence):
     numeric = number(value)
     score = threshold_score(numeric, 'production')
     if numeric is not None and numeric > 0:
-        score = max(0.5, score)
+        score = max(1.0, score)
     if presence in reference.rules_POSITIVE_MARKET_PRESENCE_STATUSES:
-        return max(0.5, score or 0.0)
+        return max(1.0, score or 0.0)
     if numeric is not None or presence == 'confirmed_zero_quantity':
         return score if score is not None else 0.0
     return None
+
+
+def score_selected_exposure_inputs(record):
+    """Recalculate four indicators from eligible raw inputs, never from old scores.
+
+    Counts/quantities here are the selected, audited inputs exported by Stage 6B.
+    Food-contact and human-detection rules are binary and remain unchanged.
+    """
+    fields = ('Exposure_inventory_listing_count', 'Exposure_inventory_data_status',
+              'Exposure_patent_count', 'Exposure_patent_data_status',
+              'Exposure_literature_count', 'Exposure_literature_data_status',
+              'Exposure_scale_value_tonnes', 'Exposure_scale_market_presence')
+    absent = set(fields) - record.keys()
+    if absent:
+        raise ValueError('Missing selected exposure inputs: ' + ', '.join(sorted(absent)))
+    scores = {}
+    for dimension, count_field in [('inventory', fields[0]), ('patent', fields[2]), ('literature', fields[4])]:
+        status = record[f'Exposure_{dimension}_data_status']
+        if status not in {'available', 'unavailable'}:
+            raise ValueError('Unknown exposure availability: ' + dimension)
+        value = threshold_score(record[count_field], dimension) if status == 'available' else None
+        if status == 'available' and value is None:
+            raise ValueError('Available exposure count is invalid: ' + dimension)
+        scores[f'Exposure_{dimension}_score'] = value
+    scores['Exposure_production_score'] = production_score(
+        record['Exposure_scale_value_tonnes'], record['Exposure_scale_market_presence'])
+    return scores
 
 
 def human_detection_score(resolution):

@@ -1,5 +1,21 @@
 # PlastPrior
 
+## PBMT and exposure scoring update (2026-11-16)
+
+The latest implementation supports PBMT scores of 0/1/2 while retaining original
+source scores, and direct exposure rules producing 0/1/2 from selected raw inputs.
+Weights and domain rounding are unchanged. The current exported dataset uses
+`priority-pbmt-exposure-rules-rounded-v1`; see
+[the current rules and migration record](docs/pbmt_three_level_scoring.md).
+Scenario export requires `--three-level-exposure` to select this policy; the
+legacy default is retained and does not select it automatically.
+
+Git distributes code, tests and configuration only. Obtain the matching current
+CSV and SQLite files separately from the project data share and place them in
+`result/`. Pulling the code does not download or regenerate the result files.
+Historical counts and validation records below describe their named baseline,
+not the current three-level dataset.
+
 ## Rounded scoring update (2026-10-27)
 
 Current rounded H/E scores, five-level labels and configurable Dashboard scenarios
@@ -218,14 +234,16 @@ They do not replace a full frozen-input run. Exact field comparisons, input
 fingerprints, execution records and the separate historical regression scope
 are described in the [reproduction guide](docs/reproduction.md#verification).
 
-### Dashboard Fig. 4 evidence
+### Dashboard Level 1 composition evidence
 
-The browser projection automatically includes verified Fig. 4 composition when
+The composition is now manuscript Extended Data Fig. 4; `Fig4` remains its stable internal
+data and database identifier (see `FigureCode/publication_order.json`).
+The browser projection automatically includes verified composition evidence when
 `result/figure_data/Fig4/` has prepared annotations for the exact exported CSV.
 All 101 baseline members, source hashes, labels, category order and three count
-tables travel in `publication_figures` alongside other figures. Preparing Fig. 4
+tables travel in `publication_figures` alongside other figures. Preparing internal `Fig4`
 also refreshes the paired dashboard database in the coordinated result swap.
-New datasets must have matching Fig. 4 annotations prepared first; stale article
+New datasets must have matching composition annotations prepared first; stale article
 annotations are never silently reused. No scoring or ranking is changed.
 
 To package existing prepared data without recalculating or rendering figures:

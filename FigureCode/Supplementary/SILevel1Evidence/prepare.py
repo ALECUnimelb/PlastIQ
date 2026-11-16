@@ -181,7 +181,10 @@ def make_payload(run_dir=None, annotations=None, policy_path=None):
     if not rows:
         raise ValueError('No Level 1 compounds in this run; the existing review is preserved')
     sources={str(p.relative_to(ROOT)) if p.is_relative_to(ROOT) else str(p):sha(p) for p in [source,manifest_file,config_file,annotation,policy_file]}
-    return {'rows':rows,'components':components,'score_palette':SCORE_FILL,
+    score_palette = SCORE_FILL
+    if config.get('exposure_score_policy') == 'exposure-three-level-rules-v1' and config.get('hazard_score_mapping') == 'pbmt-three-level-v1':
+        score_palette = {k: v for k, v in SCORE_FILL.items() if k in {'0', '1', '2'}}
+    return {'rows':rows,'components':components,'score_palette':score_palette,
             'regulatory_legend':[{'code':v[0],'label':v[1],'colour':v[2]} for v in GIC.values()],
             'metadata':{'run_id':manifest['run_id'],'cohort_size':len(rows),'population_size':len(records),
                         'policy_version':policy['version'],'level_counts':levels,'cutpoints':policy['cutpoints'],

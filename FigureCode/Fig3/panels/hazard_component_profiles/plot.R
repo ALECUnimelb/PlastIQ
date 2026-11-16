@@ -6,6 +6,7 @@
 
 plot_hazard_component_profiles <- function(panel_data, config, variant = "publication") {
   profiles <- panel_data$hazard_component_profiles
+  if (isTRUE(three_level_pbmt)) hazard_profile_levels <- setdiff(hazard_profile_levels,c('Score 0.25','Low (0.5)'))
   profiles$component <- factor(
     profiles$component,
     levels = rev(names(hazard_components))

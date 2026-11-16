@@ -1,3 +1,5 @@
+> Current publication: **Fig. 3**. `ExtendedDataFig3` is the stable internal code/data ID. Use the root publication registry and render entrypoint. Historical descriptions below retain internal IDs.
+
 # Extended Data Fig. 3: GIC regulatory concordance
 
 The current-data module replaces the former three-tier positive-input figure.
@@ -39,7 +41,7 @@ the three panels in R. Full methods are in `FigureCode/captions_draft.md`.
 - GIC annotations are frozen database context and overlap scoring sources. These
   comparisons are descriptive, not independent validation or weight optimization.
 
-Images: `result/figures/ExtendedDataFig3.png` and `.pdf`.
+Images: `result/figures/Fig3.png` and `.pdf`.
 CSV/JSON and RDS: `result/figure_data/ExtendedDataFig3/`.
 Source/configuration hashes, preparation and build manifests, migration receipt
 and QA: `result/figure_data/_metadata/ExtendedDataFig3/`.

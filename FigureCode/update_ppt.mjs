@@ -11,7 +11,7 @@ async function buildReviewDeck() {
  const runtime=path.join(process.env.HOME,'.cache/codex-runtimes/codex-primary-runtime/dependencies');
  const require=createRequire(path.join(runtime,'node/node_modules/@oai/artifact-tool/package.json'));
  const {Presentation,PresentationFile,FileBlob}=await import(pathToFileURL(require.resolve('@oai/artifact-tool')).href);
- const skill=process.env.PRESENTATIONS_SKILL_DIR ?? path.join(process.env.HOME,'.codex/plugins/cache/openai-primary-runtime/presentations/26.1020.11618/skills/presentations');
+ const skill=process.env.PRESENTATIONS_SKILL_DIR ?? path.join(process.env.HOME,'.codex/plugins/cache/openai-primary-runtime/presentations/26.1103.20233/skills/presentations');
  const {finalizePresentation}=await import(pathToFileURL(path.join(skill,'container_tools/artifact_tool_utils.mjs')).href);
  process.env.RUNTIME_NODE_MODULES ??= path.join(runtime,'node/node_modules');
  const destinationDir=path.join(root,'result');
@@ -34,18 +34,19 @@ async function buildReviewDeck() {
   hashes.add(key);entries.push({source,title,status,sha256:sha});
  }
  const figures=path.join(root,'result/figures');
- const mainNames=['Fig1','Fig2','Fig3','Fig4','Fig5','ExtendedDataFig1','ExtendedDataFig2','ExtendedDataFig3','ExtendedDataFig4'];
- for(const name of mainNames) {
-  const item=catalog.figures[name];
+ const order=JSON.parse(await fs.readFile(path.join(root,'FigureCode/publication_order.json'),'utf8')).figures;
+ for(const row of order) {
+  const name=row.name;
+  const item=catalog.figures[row.id];
   const folder=figures;
-  const label=name.startsWith('Extended')?`Extended Data Fig. ${name.slice(-1)}`:`Fig. ${name.slice(-1)}`;
+  const label=row.label;
   const status=item.review?'Review':item.formal==='current'?'Approved':'Legacy — pending update';
   await add(path.join(folder,name+'.png'),label,status);
  }
- // The review deck contains exactly these nine manuscript figures.
+ // The review deck follows the single publication-order registry.
  // Standalone Fig3b, SI tables, retained identity/tree and sensitivity assets
  // remain separate files and must never be appended automatically.
- if(entries.length!==9)throw new Error('Expected nine manuscript figure slides');
+ if(entries.length!==order.length)throw new Error('Expected one slide for each registered manuscript figure');
  console.log(`Review deck: ${entries.length} manuscript figure slides.`);
  const captions={};
  for(const section of (await fs.readFile(path.join(root,'FigureCode/captions_draft.md'),'utf8')).split('\n## ').slice(1)) {

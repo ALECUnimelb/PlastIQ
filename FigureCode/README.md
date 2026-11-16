@@ -1,66 +1,82 @@
 # Figure code
 
-`FigureCode/` contains implementations and configuration only. Current plotting
-inputs live in `result/figure_data/<figure>/`, and finished images live directly
-in `result/figures/`. Existing files are replaced; no dated or parallel copies
-are created. Use [INDEX.md](INDEX.md) and [SI_INDEX.md](SI_INDEX.md) for figure status.
+The current manuscript contains **Fig. 1–4 and Extended Data Fig. 1–6**.
+`publication_order.json` is the single source of publication numbering and order.
+Use [INDEX.md](INDEX.md) and [SI_INDEX.md](SI_INDEX.md) for current files and review status.
 
-- `Fig1`–`Fig5`, `ExtendedDataFig1`–`ExtendedDataFig4`: manuscript figures.
-- `Supplementary/`: SI evidence workbook/PDF, retained identity list and tree.
-- `_shared/`: common plotting and storage helpers; `sensitivity/` retains
-  legacy functions associated with the explicitly retained old sensitivity figure.
+Publication filenames are separate from stable implementation/data IDs:
 
-## Prepare data, then render
+| Publication | Internal module and data ID | Content |
+|---|---|---|
+| Fig. 1 | Fig2 | PBMT coverage and concordance |
+| Fig. 2 | Fig3 | Priority landscape and evidence profiles |
+| Fig. 3 | ExtendedDataFig3 | GIC regulatory concordance |
+| Fig. 4 | Fig5 | Weight and threshold sensitivity |
+| Extended Data Fig. 1 | Fig1 | Imported workflow diagram |
+| Extended Data Fig. 2 | ExtendedDataFig1 | Inventory assembly and source overlap |
+| Extended Data Fig. 3 | ExtendedDataFig2 | PBMT and exposure evidence patterns |
+| Extended Data Fig. 4 | Fig4 | Level 1 uses, structures and regulation |
+| Extended Data Fig. 5 | ExtendedDataFig4 | Imported dashboard screenshot |
+| Extended Data Fig. 6 | DatabaseTimeline | Imported database timeline |
+
+Historical module names, `result/figure_data/<internal ID>/`, metadata directories
+and database evidence keys remain stable. In particular, the database `Fig4` key
+still means Level 1 composition, now published as Extended Data Fig. 4. Never globally substitute
+these identifiers when manuscript numbers change.
+
+## Render by current publication name
 
 ```sh
-# Refresh all current-dataset figure inputs together; no images or scores change.
-.venv/bin/python FigureCode/prepare_data.py
-# Validate preparation against existing tables without replacing anything.
-.venv/bin/python FigureCode/prepare_data.py --check
-# Render a layout from its prepared inputs.
-.venv/bin/python FigureCode/Fig3/run_plot.py
-.venv/bin/python FigureCode/Fig4/run_plot.py
-.venv/bin/python FigureCode/Fig5/run_plot.py
-.venv/bin/python FigureCode/ExtendedDataFig3/run_plot.py
-.venv/bin/python FigureCode/Supplementary/SILevel1Evidence/run_plot.py
-# Verify all current deliverables and original provenance.
+.venv/bin/python FigureCode/run_plot.py --figure Fig3
+.venv/bin/python FigureCode/run_plot.py --figure ExtendedDataFig6
 .venv/bin/python FigureCode/verify_figures.py
 ```
 
-Each R module has `prepare.R` for numerical input preparation and `build.R` for
-rendering. CSV/JSON tables remain inspectable; `plot_data.rds` preserves the typed
-R objects needed to render without reopening the analysis database. Its hash and
-source lock are recorded in `figure_data/_metadata/<figure>/preparation.json`.
-Layout work runs only the render command. Preparation stages the complete selected
-set, validates it, and replaces it together. Changed numerical data mark the
-existing images stale; verification and PPT generation reject stale figures until
-they are rendered again. Failures retain the last complete set.
+The numerical renderers consume existing CSV tables and `plot_data.rds`; they do
+not rescore compounds. Direct historical module entrypoints also publish to the
+mapped current filenames. Layout and numbering work must not run preparation.
+Scientific data updates still use `FigureCode/prepare_data.py` explicitly, with
+stable internal IDs for `--figures`. Its default excludes imported raster assets.
+Changed prepared inputs make dependent rendered figures stale until rebuilt.
 
-Extended Data Fig. 3 now uses current-data GIC concordance and is included in
-default preparation. It is approved, as recorded in `catalog.json`. Its retired GIC exploration
-module and exports are removed. Extended Data Fig. 4 is a separate Dashboard capture. The
-retained identity list and tree use their existing classified table through
-`FigureCode/run_retained.py`. Structural reclassification requires separate
-review, and a changed Level 1 membership fails the Fig. 4 consistency check.
-Primary-use annotations are in `result/figure_data/_dependencies/`.
+The workflow, dashboard and timeline are imported from the supplied manuscript.
+Their original raster bytes live in `result/figure_data/_dependencies/manuscript_assets/`.
+`_metadata/<internal ID>/publication_asset.json` records the source document hash,
+embedded image, image hashes and any retained historical evidence. Their publication
+entrypoints restore those pinned rasters; they do not invoke the old workflow
+renderer or silently recapture a different dashboard. These assets have PNG exports,
+not newly created vector PDFs, and remain pending review until explicitly accepted.
+Retained historical metadata does not claim that the imported image was built by
+that historical code.
 
-Changing the analysis dataset remains a coordinated data-update operation. Its
-source locks and all dependent tables must be updated together before installation;
-the database exporter rejects an uncoordinated replacement. Figure preparation
-does not calculate scores, ranks or Top-N membership.
+## Storage and verification
+
+Images are flat in `result/figures/`; each current figure has one set. Unchanged
+numerical inputs remain in `result/figure_data/<internal ID>/`. `_dependencies/`
+contains required baselines and annotations; `_metadata/` contains provenance and
+validation. Original build manifests keep internal filenames; `artifact_path()`
+resolves the corresponding public filename exactly once. Retirement records account
+for removed standalone Fig3b exports. Numbering transitions do not approve images.
+
+Updates are staged, validated and installed as a complete result tree with rollback.
+The source CSV, both SQLite databases, scores, ranks and Top-N membership are unchanged
+by publication renumbering. Keep the SI workbook/PDF, retained identity list, structural
+tree and old sensitivity figure. Do not recreate retired exploratory exports.
 
 ## Presentation
 
-`node FigureCode/update_ppt.mjs` replaces the sole PPTX in `result/`, preserving
-its manual filename. It defaults to `Figures.pptx` only when no PPTX exists and
-rejects multiple decks. It includes exactly nine slides: Fig. 1–5 and Extended
-Data Fig. 1–4. Standalone Fig. 3b, SI pages, identity/tree and old sensitivity
-images are not appended. Do not run it over manual PPT edits unless regeneration
-is requested. Fig. 3 no longer exports a standalone Fig. 3b on rebuild.
+`node FigureCode/update_ppt.mjs` explicitly regenerates the sole PPTX in `result/`,
+preserving its manual filename and using the ten registry entries in order. It has
+no historical-deck dependency. Do not run it over manual PPT edits unless regeneration
+is requested. For the manuscript reorder, the existing deck was edited locally:
+its masters, layouts and first six existing figure frames were preserved, titles
+and notes were synchronized, outdated GIC/dashboard images were replaced, and workflow
+and timeline slides were added. SI pages and retained ancillary figures are excluded.
 
-Current images and the user-edited presentation were preserved during the code
-reorganization. Fig. 4 retains the accepted three-bar layout; Fig. 3 visual redesign
-is a separate task. Original manifests retain historical paths, resolved through
-`_shared/result_paths.py`. See [storage rules](../docs/results_layout.md).
+`manage.py approve <publication name>` explicitly accepts a reviewed public figure;
+`manage.py index` refreshes the index. Acceptance is never implied by file replacement.
+See [storage rules](../docs/results_layout.md).
 
-Fig. 5 is the current five-level sensitivity analysis. Its simplified image and full caption replace the former policy-concordance Fig. 5. The separate sensitivity exploration module and draft exports have been retired. The user-edited deck currently omits Fig. 1; targeted updates preserve that manual page selection.
+The latest Fig. 3 / Extended Data Fig. 4 exchange updates the registry and PNG/PDF
+filenames only. The manually edited PPT and external manuscript were not changed
+in this phase; their numbering and numerical text still require synchronization.

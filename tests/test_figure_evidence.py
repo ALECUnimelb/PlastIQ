@@ -104,6 +104,26 @@ class PackagingTests(unittest.TestCase):
         self.manifest.write_text('{}')
         attach(self.root, self.output)
 
+    def test_new_cohort_keeps_pending_uses_instead_of_dropping_members(self):
+        for i in range(101,115):
+            self.members.append({**self.members[0], 'inchikey':f'compound-{i}',
+                                 'primary_use':'Pending use review'})
+        self.write(self.publication, self.members)
+        self.write(self.source/'compound_membership.csv', self.members)
+        for key,field in [('use','primary_use'),('structure','structure_group'),('reg','GIC_regulatory_status')]:
+            categories=list(dict.fromkeys(m[field] for m in self.members))
+            self.write(self.source/f'{key}_counts.csv', [dict(category=c,label=c,
+                       n=sum(m[field]==c for m in self.members)) for c in categories])
+        self.lock()
+        payload=module.prepare(self.root)
+        self.assertEqual(len(payload['members']),115)
+        self.assertEqual(len(payload['use']),17)
+        self.assertEqual(next(r for r in payload['use'] if r['category']=='Pending use review')['n'],'14')
+        # A missing category must still fail even with freshly calculated hashes.
+        self.write(self.source/'use_counts.csv',payload['use'][:-1]);self.lock()
+        with self.assertRaisesRegex(ValueError,'categories'):
+            module.prepare(self.root)
+
     def test_staging_breaks_hardlinks(self):
         import os
         original = module.digest(self.db)

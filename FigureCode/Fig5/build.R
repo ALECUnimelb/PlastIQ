@@ -46,7 +46,7 @@ pb<-ggplot(h,aes(metric,scenario,fill=value_pct))+
  geom_text(aes(label=label,colour=value_pct>=68),size=2.65,family=font)+
  scale_colour_manual(values=c('TRUE'='white','FALSE'=ink),guide='none')+
  scale_fill_gradient(low='#F1F4F6',high='#29465D',limits=c(0,100),breaks=c(0,50,100),labels=c('0%','50%','100%'),name=NULL)+
- scale_x_discrete(labels=c('All levels'='Level\nagreement','Level 1'='Level 1\nJaccard','Levels 1 + 2'='Level 1 + 2\nJaccard'),expand=c(0,0))+
+ scale_x_discrete(labels=c('All levels'='Overall level\nagreement','Level 1'='Level 1\nJaccard','Levels 1 + 2'='Level 1 + 2\nJaccard'),expand=c(0,0))+
  scale_y_discrete(expand=c(0,0))+
  labs(x=NULL,y=NULL,tag='b')+
  guides(fill=guide_colourbar(direction='vertical',barwidth=grid::unit(2.5,'mm'),barheight=grid::unit(22,'mm'),

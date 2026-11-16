@@ -1,3 +1,5 @@
+> Current publication: **Fig. 4**. `Fig5` is the stable internal code/data ID. Use the root publication registry and render entrypoint. Historical descriptions below retain internal IDs.
+
 # Fig. 5: sensitivity of five-level priorities
 
 `prepare.R` prepares individual ±20% weight experiments and eight alternative-setting scenarios from the locked current evidence. `build.R` renders the prepared tables without recalculation. Only necessary axis labels, legends and panel letters appear in the image; the methods and metric definitions are in the Fig. 5 section of `FigureCode/captions_draft.md`.

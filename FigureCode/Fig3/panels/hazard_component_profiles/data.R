@@ -26,6 +26,10 @@ classify_hazard_score <- function(values) {
 }
 
 prepare_hazard_component_profiles <- function(compounds) {
+  if (isTRUE(three_level_pbmt)) {
+    hazard_score_classes <- setdiff(hazard_score_classes,c('Score 0.25','Low (0.5)'))
+    stopifnot(all(unlist(compounds[unname(hazard_components)]) %in% c(NA,0,1,2)))
+  }
   rows <- list()
   row_index <- 1L
   for (component_order in seq_along(hazard_components)) {

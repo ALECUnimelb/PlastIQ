@@ -15,7 +15,7 @@ MODULE = ROOT / 'FigureCode/Fig4'
 LOCK = MODULE / 'approved_composition.json'
 sys.path.insert(0, str(ROOT / 'FigureCode/_shared'))
 from managed import code_hashes, paths_for, replace_pair, sha, update_catalog, verify_sources, write_json
-from result_paths import relocated, verify_code, verify_digest, manifest_path
+from result_paths import relocated, verify_code, verify_digest, manifest_path, artifact_path
 
 
 def read_rows(path):
@@ -33,7 +33,7 @@ def check_records(records):
 def verify_tables(folder, publication):
     rows = read_rows(folder / 'compound_membership.csv')
     ids = [row['inchikey'] for row in rows]
-    assert len(ids) == len(set(ids)) == 101, 'Expected 101 unique compounds'
+    assert ids and len(ids) == len(set(ids)), 'Expected a nonempty unique cohort'
     full = {row['inchikey']: row for row in read_rows(publication)}
     expected = {key for key, row in full.items()
                 if Decimal(row['Hazard_score']) >= 12 and Decimal(row['Exposure_score']) >= 12}
@@ -50,18 +50,20 @@ def verify_tables(folder, publication):
         assert row['Figure_priority_level'] == '1'
         assert row['structure_group'] == identity[row['inchikey']]['structure_group']
         assert row['primary_use'] == uses[row['inchikey']]['primary_use']
-    for filename, field, categories in (
-        ('use_counts.csv', 'primary_use', 16),
-        ('structure_counts.csv', 'structure_group', 9),
-        ('reg_counts.csv', 'GIC_regulatory_status', 5),
+    panel_categories = []
+    for filename, field in (
+        ('use_counts.csv', 'primary_use'),
+        ('structure_counts.csv', 'structure_group'),
+        ('reg_counts.csv', 'GIC_regulatory_status'),
     ):
         counts = read_rows(folder / filename)
-        assert len(counts) == len({row['category'] for row in counts}) == categories
+        assert len(counts) == len({row['category'] for row in counts})
+        panel_categories.append(len(counts))
         assert {row['category']: int(row['n']) for row in counts} == Counter(row[field] for row in rows)
-        assert sum(int(row['n']) for row in counts) == 101
+        assert sum(int(row['n']) for row in counts) == len(ids)
     classification = json.loads((folder / 'classification.json').read_text())
     assert classification['group_counts'] == Counter(row['structure_group'] for row in rows)
-    return {'cohort': 101, 'panel_categories': [16, 9, 5], 'panel_totals': [101, 101, 101],
+    return {'cohort': len(ids), 'panel_categories': panel_categories, 'panel_totals': [len(ids)] * 3,
             'scores_ranks_top_n_unchanged': True, 'classification_assignments_unchanged': True}
 
 
@@ -84,17 +86,18 @@ def verify_publication(manifest=None):
     verify_digest(LOCK, provenance['lock_sha256'])
     assert provenance['legacy_archive'] == lock['legacy_archive']
     verify_code(manifest['code'], code_hashes(MODULE))
-    check_records(lock['images'])
+    check_records({name:dict(record,path=str(artifact_path('Fig4',name).relative_to(ROOT)))
+                   for name,record in lock['images'].items()})
     check_records(lock['tables'])
     check_records(lock['render_provenance'])
     assert set(manifest['outputs']) == set(lock['images']) == {'Fig4.png', 'Fig4.pdf'}
     for name, record in lock['images'].items():
-        assert manifest['outputs'][name] == record['sha256'] == sha(output / name), name
+        assert manifest['outputs'][name] == record['sha256'] == sha(artifact_path('Fig4',name)), name
     assert set(manifest['source_data']) == set(lock['tables'])
     for name, record in lock['tables'].items():
         assert manifest['source_data'][name] == record['sha256'] == sha(tables / name), name
     facts = verify_tables(tables, ROOT / manifest['source']['files']['publication']['path'])
-    document = PdfReader(output / 'Fig4.pdf')
+    document = PdfReader(artifact_path('Fig4','Fig4.pdf'))
     assert len(document.pages) == 1
     page = document.pages[0]
     # Cairo stores the page box in integer points; allow that original export

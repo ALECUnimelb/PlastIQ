@@ -1,4 +1,4 @@
-"""Generate Extended Data Fig. 4 from the locked PlastPrior analysis."""
+"""Generate Extended Data Fig. 4 from the locked PlastIQ analysis."""
 from pathlib import Path
 import sys
 HERE = Path(__file__).resolve().parent

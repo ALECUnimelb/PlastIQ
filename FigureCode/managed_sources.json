@@ -3,12 +3,12 @@
   "run_id": "20261116T070538Z-rounded",
   "files": {
     "analysis": {
-      "path": "result/PlastPrior_results.sqlite",
-      "sha256": "7a72ddb2b9ec86018a2a4a1fe5d72abf7ed68b4ae7bf6adeb85ff762a3b8c46a"
+      "path": "result/PlastIQ_results.sqlite",
+      "sha256": "87cc520b2413cf504449c003447c1828cddcd103f9c32f8d242fac59851e232f"
     },
     "publication": {
-      "path": "result/PlastPrior_results.csv",
-      "sha256": "dc699dddd4caa1588b32296cc0a8e6d89098972bcca384ee440d8b071f2e55a2"
+      "path": "result/PlastIQ_results.csv",
+      "sha256": "ee925ea32d1a4bbcc65331a668e9719e77ba76710bf4639ef5014f4e93bc36c2"
     }
   },
   "total": 15125,

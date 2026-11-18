@@ -8,6 +8,7 @@ import unittest
 from unittest.mock import patch
 from plastprior.scenario_export import export_scenario, sha
 from plastprior.scoring_scenarios import COMPONENT_MAXIMA, three_level_policy, three_level_exposure_policy
+from plastprior.result_names import canonicalise_names
 
 class ExportTests(unittest.TestCase):
     def test_preserves_audit_and_builds_paired_current_results(self):
@@ -46,21 +47,24 @@ class ExportTests(unittest.TestCase):
             for db in connections:
                 with self.assertRaises(sqlite3.ProgrammingError):
                     db.execute('SELECT 1')
-            with (output/csv_path.name).open(encoding='utf-8',newline='') as f:
+            with (output/'PlastIQ_results.csv').open(encoding='utf-8',newline='') as f:
                 self.assertEqual(next(csv.DictReader(f))['Name'], '化合物 α')
             self.assertEqual(before,{p.name:sha(p) for p in source.iterdir()})
             self.assertEqual(summary['rows'],1)
-            with closing(sqlite3.connect(output/archive.name)) as db, db:
+            with closing(sqlite3.connect(output/'PlastIQ_results.sqlite')) as db, db:
                 self.assertEqual(db.execute('SELECT Hazard_score FROM compounds').fetchone()[0],'0.5')
                 self.assertEqual(db.execute('SELECT Hazard_score,Hazard_score_raw,Priority_level FROM current_compounds').fetchone(),('1','0.50','5'))
                 self.assertEqual(db.execute('SELECT evidence FROM audit_records').fetchone()[0],'unchanged')
-            with closing(sqlite3.connect(output/detail.name)) as db, db:
+            with closing(sqlite3.connect(output/'PlastIQ_dashboard.sqlite')) as db, db:
                 meta=dict(db.execute('SELECT key,value FROM metadata'))
-                self.assertEqual(meta['csv_sha256'],sha(output/csv_path.name))
+                self.assertEqual(meta['csv_sha256'],sha(output/'PlastIQ_results.csv'))
+            # A byte-identical baseline with the new filenames remains usable.
+            canonicalise_names(source)
+            renamed_before={p.name:sha(p) for p in source.iterdir()}
             export_scenario(source,output)
             self.assertFalse(output.is_symlink())
             self.assertFalse(list(root.glob('.new-previous')))
-            self.assertEqual(before,{p.name:sha(p) for p in source.iterdir()})
+            self.assertEqual(renamed_before,{p.name:sha(p) for p in source.iterdir()})
 
     def test_three_level_export_preserves_source_evidence_and_updates_all_current_views(self):
         self._assert_three_level_export(three_level_policy())
@@ -105,11 +109,11 @@ class ExportTests(unittest.TestCase):
             output = root / 'new'
             summary = export_scenario(source, output, policy)
             self.assertEqual(original_hashes, {p.name: sha(p) for p in source.iterdir()})
-            with (output / csv_path.name).open(newline='') as f:
+            with (output / 'PlastIQ_results.csv').open(newline='') as f:
                 exported = {r['inchikey']: r for r in csv.DictReader(f)}
             for filename, tables, key in [
-                ('PlastPrior_results.sqlite', ['scenario_results', 'current_compounds'], 'inchikey'),
-                ('PlastPrior_dashboard.sqlite', ['compound_audit'], 'inchikey_std'),
+                ('PlastIQ_results.sqlite', ['scenario_results', 'current_compounds'], 'inchikey'),
+                ('PlastIQ_dashboard.sqlite', ['compound_audit'], 'inchikey_std'),
             ]:
                 with closing(sqlite3.connect(output / filename)) as db:
                     for table in tables:
@@ -120,7 +124,7 @@ class ExportTests(unittest.TestCase):
                             actual = db.execute('SELECT '+','.join(fields_to_check)+' FROM '+table+' WHERE '+key+'=?',
                                                 (row['inchikey'],)).fetchone()
                             self.assertEqual(actual, tuple(exported[row['inchikey']][f] for f in fields_to_check))
-            with closing(sqlite3.connect(output / 'PlastPrior_results.sqlite')) as db:
+            with closing(sqlite3.connect(output / 'PlastIQ_results.sqlite')) as db:
                 self.assertEqual(db.execute('SELECT Persistence_score,Persistence_evidence FROM compounds ORDER BY inchikey').fetchall(),
                                  [(r['Persistence_score'], evidence) for r in rows])
                 self.assertEqual(db.execute('SELECT Exposure_production_score FROM compounds ORDER BY inchikey').fetchall(),
@@ -138,7 +142,7 @@ class ExportTests(unittest.TestCase):
                 self.assertEqual(float(exported['B']['Exposure_production_score']), 2)
                 self.assertEqual(exported['C']['Exposure_production_score'], '')
                 self.assertIn('exposure_policy.json', summary['implementation_sha256'])
-                with closing(sqlite3.connect(output / 'PlastPrior_dashboard.sqlite')) as db:
+                with closing(sqlite3.connect(output / 'PlastIQ_dashboard.sqlite')) as db:
                     self.assertEqual(db.execute('SELECT Exposure_production_score FROM baseline_scoring ORDER BY inchikey_std').fetchall(),
                                      [(r['Exposure_production_score'],) for r in rows])
                     meta = dict(db.execute('SELECT key,value FROM metadata'))

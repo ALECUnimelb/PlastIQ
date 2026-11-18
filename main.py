@@ -1,4 +1,5 @@
-"""Run staged chemical evidence, hazard, exposure and priority assessment."""
+"""Run PlastIQ chemical evidence, hazard, exposure and priority assessment."""
+from plastprior.result_names import CURRENT
 
 import argparse
 from pathlib import Path
@@ -210,8 +211,8 @@ def main(argv: list[str] | None = None) -> int:
                              baseline_csv=args.baseline_csv,
                              priority_migration_baseline=args.priority_migration_baseline,
                              progress=lambda message: print(message, flush=True))
-        print(f"Current CSV: {daily_dir / 'PlastPrior_results.csv'}")
-        print(f"Current Dashboard SQLite: {daily_dir / 'PlastPrior_dashboard.sqlite'}")
+        print(f"Current CSV: {daily_dir / CURRENT['publication']}")
+        print(f"Current Dashboard SQLite: {daily_dir / CURRENT['dashboard']}")
         print(f"Complete audit archive: {package['directory']}")
     return 0 if passed else 1
 

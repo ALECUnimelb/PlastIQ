@@ -4,6 +4,9 @@ import hashlib
 import json
 
 ROOT = Path(__file__).resolve().parents[2]
+import sys
+sys.path.insert(0, str(ROOT))
+from plastprior.result_names import result_file
 
 
 def entries():
@@ -44,7 +47,7 @@ def verify_asset(figure, result=None):
     assert record['figure'] == figure
     assert record['status'] in {'review', 'approved'}
     assert set(record['outputs']) == {figure+'.png'}, (figure, 'unexpected raster exports')
-    assert sha(result/'PlastPrior_results.csv') == record['reference_csv_sha256'], (figure, 'dataset changed; review imported figure')
+    assert sha(result_file(result, 'publication')) == record['reference_csv_sha256'], (figure, 'dataset changed; review imported figure')
     source = result/record['source_asset']
     assert sha(source) == record['source_sha256'], (figure, 'changed imported source')
     for name, digest in record['outputs'].items():

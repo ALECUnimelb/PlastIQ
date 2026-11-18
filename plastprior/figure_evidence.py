@@ -1,4 +1,5 @@
 """Verified Fig. 4 evidence for browser exports; never infer or rescore annotations."""
+from .result_names import result_file
 from collections import Counter
 from contextlib import closing
 import csv
@@ -24,7 +25,7 @@ def read_rows(path):
 
 def prepare(result, publication=None):
     result = Path(result)
-    publication = Path(publication) if publication is not None else result / 'PlastPrior_results.csv'
+    publication = Path(publication) if publication is not None else result_file(result, 'publication')
     csv_hash = digest(publication)
     manifest_path = result / 'figure_data/_metadata/Fig4/preparation.json'
     if not manifest_path.exists():
@@ -32,6 +33,9 @@ def prepare(result, publication=None):
     manifest = json.loads(manifest_path.read_text())
     if manifest['source']['files']['publication']['sha256'] != csv_hash:
         raise ValueError('Fig. 4 belongs to a different publication CSV.')
+    analysis = manifest['source']['files'].get('analysis')
+    if analysis and analysis['sha256'] != digest(result_file(result, 'analysis')):
+        raise ValueError('Fig. 4 belongs to a different analysis archive.')
     source = result / 'figure_data/Fig4'
     required_files = {'compound_membership.csv', 'use_counts.csv', 'structure_counts.csv', 'reg_counts.csv'}
     if not required_files <= manifest['source_data'].keys():
@@ -108,13 +112,13 @@ def add_fig4(db, publication, source=None, *, required=False):
 def package_fig4(result):
     """Modify only a staging directory. Break hardlinks before changing SQLite."""
     result = Path(result)
-    target = result / 'PlastPrior_dashboard.sqlite'
+    target = result_file(result, 'dashboard')
     with tempfile.TemporaryDirectory(prefix='.fig4-', dir=result.parent) as temporary:
         candidate = Path(temporary) / target.name
         with closing(sqlite3.connect(target.resolve().as_uri() + '?mode=ro', uri=True)) as old:
             with closing(sqlite3.connect(candidate)) as db:
                 old.backup(db)
-                report = add_fig4(db, result / 'PlastPrior_results.csv', result, required=True)
+                report = add_fig4(db, result_file(result, 'publication'), result, required=True)
                 db.commit()
                 for (table,) in old.execute("SELECT name FROM sqlite_master WHERE type='table'"):
                     quoted = '"' + table.replace('"', '""') + '"'

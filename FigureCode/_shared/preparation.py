@@ -41,7 +41,7 @@ def verify_prepared(name):
     if hashes(folder) != record['source_data']: raise ValueError('Prepared figure inputs changed: '+name)
     lock_name = 'managed_sources.json' if name in CURRENT else 'figure_sources.json'
     lock = json.loads((ROOT/'FigureCode'/lock_name).read_text())
-    if lock['files'] != record['source']['files']:
+    if relocated(lock['files']) != relocated(record['source']['files']):
         raise ValueError('Source lock changed; prepare figure data again: '+name)
     return record
 
@@ -139,5 +139,8 @@ def prepare(names, *, check_existing=False, install=True):
             if 'Fig4' in records:
                 from plastprior.figure_evidence import package_fig4
                 package_fig4(stage)
+            if 'ExtendedDataFig1' in records:
+                from plastprior.sankey_evidence import package_sankey
+                package_sankey(stage)
             replace_directory(stage,RESULT)
     return records

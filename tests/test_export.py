@@ -107,8 +107,8 @@ class ExportTests(unittest.TestCase):
         self.assertEqual(package['compounds'], 4)
         self.assertEqual(package['top_n_compounds'], 2)
         self.assertEqual({p.name for p in package['directory'].iterdir()},
-                         {'PlastPrior_results.csv', 'PlastPrior_results.sqlite',
-                          'PlastPrior_data_dictionary.csv', 'README.md', 'dashboard'})
+                         {'PlastIQ_results.csv', 'PlastIQ_results.sqlite',
+                          'PlastIQ_data_dictionary.csv', 'README.md', 'dashboard'})
         with package['csv'].open(encoding='utf-8', newline='') as stream:
             rows = list(csv.DictReader(stream))
         self.assertEqual([r['inchikey'] for r in rows], ['a', 'b', 'zero', 'missing'])

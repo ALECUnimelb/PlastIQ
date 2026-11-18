@@ -19,7 +19,8 @@ class ResultStorageTests(TestCase):
     def test_replacement_keeps_required_baseline_and_removes_backup(self):
         (self.result/'baseline').mkdir();(self.result/'baseline/evidence').write_text('keep')
         install_package(self.package,self.result)
-        self.assertEqual((self.result/'PlastPrior_results.csv').read_text(),'new')
+        self.assertEqual((self.result/'PlastIQ_results.csv').read_text(),'new')
+        self.assertFalse((self.result/'PlastPrior_results.csv').exists())
         self.assertEqual((self.result/'figure_data/_dependencies/baseline/evidence').read_text(),'keep')
         self.assertFalse(self.result.is_symlink())
         self.assertFalse(list(self.root.glob('.result-*')))

@@ -8,6 +8,9 @@ import hashlib
 import json
 
 ROOT = Path(__file__).resolve().parents[3]
+import sys
+sys.path.insert(0, str(ROOT))
+from plastprior.result_names import result_file, result_files
 MODULE = Path(__file__).resolve().parent
 COMPONENTS = [
     ('P', 'Persistence_score', 'Persistence', 'hazard'),
@@ -162,7 +165,7 @@ def make_payload(run_dir=None, annotations=None, policy_path=None):
     run_dir=Path(run_dir).resolve() if run_dir else ROOT/default['run_dir']
     annotation=Path(annotations).resolve() if annotations else ROOT/default['annotations']
     policy_file=Path(policy_path).resolve() if policy_path else ROOT/default['policy']
-    source=run_dir/'PlastPrior_results.csv'
+    source=result_file(run_dir, 'publication')
     manifest_file=run_dir/'figure_data/_metadata/scenario_manifest.json'
     config_file=run_dir/'figure_data/_metadata/scoring_config.json'
     manifest=json.loads(manifest_file.read_text())

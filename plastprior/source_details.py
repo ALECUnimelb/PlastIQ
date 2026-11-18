@@ -1,4 +1,5 @@
 """Browser projection of frozen source identities; no identity resolution or scoring."""
+from .result_names import CURRENT, DICTIONARY_NAME
 from collections import defaultdict
 import json
 
@@ -99,8 +100,8 @@ def refresh_browser_projection(archive_path, csv_path, database_path, destinatio
     destination = Path(destination)
     baseline = {str(p.resolve()): sha256(p) for p in (archive_path, csv_path, database_path)}
     destination.mkdir(parents=True, exist_ok=False)
-    output_csv = destination / 'PlastPrior_results.csv'
-    output_db = destination / 'dashboard' / 'PlastPrior_dashboard.sqlite'
+    output_csv = destination / CURRENT['publication']
+    output_db = destination / 'dashboard' / CURRENT['dashboard']
     output_db.parent.mkdir()
     shutil.copy2(csv_path, output_csv)
     shutil.copy2(database_path, output_db)  # Never mutate hard-linked historical files.

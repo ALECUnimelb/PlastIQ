@@ -24,7 +24,7 @@ preparation=importlib.util.module_from_spec(spec);spec.loader.exec_module(prepar
 sha=preparation.sha
 sys.path.insert(0,str(ROOT/'FigureCode/_shared'))
 from managed import replace_pair
-from result_paths import figure_paths, relocated, resolve, verify_code, RESULT, manifest_path
+from result_paths import figure_paths, relocated, resolve, verify_code, verify_digest, RESULT, manifest_path
 
 
 def write_json(path,value):
@@ -38,6 +38,7 @@ def paths(state):
 def code_hashes():
     files=[MODULE/n for n in ['prepare.py','build.R','export_excel.mjs','run_plot.py','source.json']]
     files.extend([ROOT/'FigureCode/_shared/managed.py', ROOT/'FigureCode/_shared/result_paths.py'])
+    files.append(ROOT/'plastprior/result_names.py')
     return {str(p.relative_to(ROOT)):sha(p) for p in files}
 
 
@@ -115,7 +116,7 @@ def verify(state='review',working=True):
     for name,digest in manifest['source_data'].items():assert sha(data/name)==digest,('Data changed',name)
     if working:
         verify_code(manifest['code'], code_hashes())
-        for path,digest in manifest['sources'].items():assert sha(resolve(path))==digest,('Input changed',path)
+        for path,digest in manifest['sources'].items():verify_digest(path,digest)
     payload=json.loads((data/'si_payload.json').read_text())
     qa=verify_xlsx(folder/f'{STEM}.xlsx',payload,manifest['qa']['workbook'])
     pdf=verify_pdf(folder/f'{NAME}.pdf',payload,manifest['qa']['figure'])
@@ -144,7 +145,7 @@ def build(args):
     current=paths('output')[1]/'si_payload.json'
     payload=json.loads(current.read_text())
     for path,digest in payload['metadata']['sources'].items():
-        assert sha(resolve(path))==digest,('Prepared SI input changed; prepare data first',path)
+        verify_digest(path,digest)
     from preparation import verify_prepared, preparation_path
     prepared_record=verify_prepared(NAME) if preparation_path(NAME).exists() else None
     stage=Path(mkdtemp(prefix='.building-',dir=MODULE));data_stage=None
@@ -170,7 +171,7 @@ def build(args):
         shutil.rmtree(stage/'.qa');(stage/'figure_qa.json').unlink();(stage/'workbook_qa.json').unlink()
         (stage/f'{STEM}.xlsx.inspect.ndjson').unlink(missing_ok=True)
         for path,digest in payload['metadata']['sources'].items():
-            assert sha(resolve(path))==digest,('Input modified during generation',path)
+            verify_digest(path,digest)
         images,data_target=paths('review')
         manifest={'schema_version':1,'kind':'supplementary_table','status':'review','figure':NAME,
                   'run_id':payload['metadata']['run_id'],'sources':payload['metadata']['sources'],'code':code_hashes(),

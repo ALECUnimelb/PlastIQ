@@ -1,4 +1,12 @@
-# PlastPrior
+# PlastIQ
+
+The project’s public name is **PlastIQ**. The Python package and data-format
+identifiers remain `plastprior` for compatibility. Current deliveries use
+`PlastIQ_*`; complete legacy `PlastPrior_*` sets remain readable. See the
+[naming and migration contract](docs/branding.md).
+
+The existing [GitHub repository](https://github.com/ALECUnimelb/PlastPrior)
+retains its old URL until the separate repository rename is completed.
 
 ## PBMT and exposure scoring update (2026-11-16)
 
@@ -24,7 +32,7 @@ are documented in [docs/rounded_scoring.md](docs/rounded_scoring.md). Use
 export and manuscript figures remain the frozen baseline.
 
 
-PlastPrior integrates chemical identity, hazard and exposure evidence to
+PlastIQ integrates chemical identity, hazard and exposure evidence to
 prioritise plastic-associated chemicals. It produces a CSV summary and a SQLite
 database containing complete final results, source links and audit records.
 
@@ -78,7 +86,7 @@ Activate the environment using the command for your shell:
 
 ```text
 python -m pip install -r requirements.txt
-python -m ipykernel install --sys-prefix --name plastprior --display-name "PlastPrior (Python 3.12)"
+python -m ipykernel install --sys-prefix --name plastprior --display-name "PlastIQ (Python 3.12)"
 ```
 
 Git is needed for the pinned Global Inventory Compiler dependency; the PyPI
@@ -112,8 +120,8 @@ separate inspection command: the complete workflow performs those checks itself.
 
 Choose either interface; both call the same scientific modules.
 
-**Notebook:** launch JupyterLab, open `PlastPrior.ipynb` from the project root,
-select **PlastPrior (Python 3.12)**, restart the kernel and run all cells.
+**Notebook:** launch JupyterLab, open `PlastIQ.ipynb` from the project root,
+select **PlastIQ (Python 3.12)**, restart the kernel and run all cells.
 
 ```text
 python -m jupyterlab
@@ -147,9 +155,9 @@ The current files are in one fixed directory:
 
 ```text
 result/
-  PlastPrior_results.csv
-  PlastPrior_results.sqlite
-  PlastPrior_dashboard.sqlite
+  PlastIQ_results.csv
+  PlastIQ_results.sqlite
+  PlastIQ_dashboard.sqlite
   figures/                       # current flat images
   figure_data/                   # prepared tables, metadata and retained dependencies
 ```
@@ -163,7 +171,7 @@ prepared. See [output layout](docs/results_layout.md) for checks and recovery.
 | --- | --- |
 | CSV | 60-field publication table, including structural family labels: identity, source memberships, selected evidence, scores, ranks and missingness |
 | Data dictionary and README | Definitions, units, null conventions, policy, source tracing and usage |
-| `PlastPrior_dashboard.sqlite` | Browser-sized projection of every final compound field, paired with the CSV by SHA-256 |
+| `PlastIQ_dashboard.sqlite` | Browser-sized projection of every final compound field, paired with the CSV by SHA-256 |
 | `publication_results` | Exact text projection of the publication CSV in the full archive |
 | `compounds` | All 251 final fields in the verified collection |
 | `eligible_ranking` | Rankable assessments, including partial evidence with unavailable contributions counted as zero in sums |
@@ -187,8 +195,8 @@ See [the current scoring policy](docs/zero_contribution_policy.md).
 The low-level exporter creates a staged package; delivery replaces the complete
 current result directory after validation. Successful temporary stages are removed.
 
-For the updated ChemicalPrioDashboard, load `PlastPrior_results.csv` followed by
-`PlastPrior_dashboard.sqlite` from the same export. The full archive
+For the updated ChemicalPrioDashboard, load `PlastIQ_results.csv` followed by
+`PlastIQ_dashboard.sqlite` from the same export. The full archive
 is for offline audit, not browser import. The display adapter preserves absent
 formal scores and uses the selected literature source. The scientific archive
 remains compact-v2; the separate publication and browser-detail contracts are
@@ -252,5 +260,5 @@ To package existing prepared data without recalculating or rendering figures:
 .venv/bin/python -m plastprior.figure_evidence result
 ```
 
-Users then import the original `PlastPrior_results.csv` and
-`PlastPrior_dashboard.sqlite` normally; no separate figure file is required.
+Users then import the original `PlastIQ_results.csv` and
+`PlastIQ_dashboard.sqlite` normally; no separate figure file is required.

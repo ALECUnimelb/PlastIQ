@@ -1,13 +1,13 @@
 """Decode current identity audits and aggregate provenance without historical tables."""
 from pathlib import Path
-import csv,json,sqlite3,sys
+import csv,json,sqlite3,sys,os
 from collections import Counter,defaultdict
 ROOT=Path(__file__).resolve().parents[2]
 sys.path.insert(0,str(ROOT))
 from plastprior.export import read_artifact_records
 
 def prepare(destination):
-    lock=json.loads((ROOT/'FigureCode/managed_sources.json').read_text())
+    lock=json.loads(Path(os.environ.get('PLASTPRIOR_SOURCE_LOCK', ROOT/'FigureCode/managed_sources.json')).read_text())
     db=sqlite3.connect((ROOT/lock['files']['analysis']['path']).as_uri()+'?mode=ro',uri=True)
     def sid(source,table):
         return {'fcchumon_s1':'FCChumon_S1','fcchumon_s2':'FCChumon_S2'}.get(table,source)

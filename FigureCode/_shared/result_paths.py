@@ -19,17 +19,20 @@ def receipt():
     return json.loads(path.read_text()) if path.exists() else {}
 
 
-def relocated(value):
+def relocated(value, *, record=None):
     """Resolve historical paths through the successive verified storage maps."""
+    record = receipt() if record is None else record
     if isinstance(value, dict):
-        return {relocated(k): relocated(v) for k, v in value.items()}
+        return {relocated(k, record=record): relocated(v, record=record) for k, v in value.items()}
     if isinstance(value, list):
-        return [relocated(v) for v in value]
+        return [relocated(v, record=record) for v in value]
     if not isinstance(value, str):
         return value
     absolute = value.startswith(str(ROOT) + '/')
     name = value[len(str(ROOT)) + 1:] if absolute else value
-    maps = receipt().get('storage_migration', {}).get('paths', []) + receipt().get('layout_cleanup', {}).get('paths', []) + receipt().get('code_layout', {}).get('paths', [])
+    # Prefer the newest mapping when a historical receipt contains an identity
+    # mapping for the same exact path. Otherwise the old self-map stops the chain.
+    maps = record.get('brand_rename', {}).get('paths', []) + record.get('storage_migration', {}).get('paths', []) + record.get('layout_cleanup', {}).get('paths', []) + record.get('code_layout', {}).get('paths', [])
     for _ in range(8):
         previous = name
         for old, new in sorted(maps, key=lambda p: len(p[0]), reverse=True):
@@ -78,6 +81,9 @@ def verify_digest(path, expected):
     # Later figure adoptions append transitions without rewriting historical hashes.
     ledgers += [item.get('code_transitions', {}) for item in receipt().get('figure_adoptions', {}).values()]
     ledgers.append(receipt().get('publication_numbering', {}).get('code_transitions', {}))
+    ledgers.append(receipt().get('evidence_release', {}).get('code_transitions', {}))
+    ledgers.append(receipt().get('brand_rename', {}).get('code_transitions', {}))
+    ledgers.append(receipt().get('brand_rename', {}).get('metadata_transitions', {}))
     ledger = ROOT/'audit_archive/workspace_migration_20261026/code_relocations.json'
     if ledger.exists(): ledgers.append(json.loads(ledger.read_text()))
     for ledger in ledgers:
@@ -99,7 +105,8 @@ def verify_code(expected, actual):
     additions = {**receipt().get('storage_migration', {}).get('added_code', {}),
                  **receipt().get('layout_cleanup', {}).get('added_code', {}),
                  **receipt().get('code_layout', {}).get('added_code', {}),
-                 **receipt().get('publication_numbering', {}).get('added_code', {})}
+                 **receipt().get('publication_numbering', {}).get('added_code', {}),
+                 **receipt().get('brand_rename', {}).get('added_code', {})}
     additions = {relocated(k):v for k,v in additions.items()}
     for name in set(actual)-set(expected):
         assert name in additions, (name, 'unrecorded build source')

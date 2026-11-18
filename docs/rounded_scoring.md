@@ -3,6 +3,15 @@
 The current rounded scoring export is `result/`. The frozen evidence
 baseline remains `result/figure_data/_dependencies/baseline/`; it is never overwritten.
 
+
+Current display-evidence delivery: see [evidence_delivery.md](evidence_delivery.md).
+Scenario export now carries Ready Biodegradability as supplemental evidence but
+is explicitly incomplete until matching Fig4 and Sankey data are prepared,
+packaged and validated. For an evidence-only update without any rescoring, use
+`python -m plastprior.evidence_release`. Formal installation rejects a missing
+Sankey. The historical reproduction instructions below describe the data-only
+export and must not be treated as a complete publication delivery.
+
 ## Rules
 
 - Hazard base weights: P=2, M=1, B=2, T=3. Maximum 16.
@@ -41,7 +50,7 @@ policies remain available for reproducing the evidence baseline.
 
 ## SQLite contract
 
-- The new `PlastPrior_results.sqlite` retains original `compounds`, all source
+- The new `PlastIQ_results.sqlite` retains original `compounds`, all source
   records, embedded stage artifacts and delta snapshots. They remain the baseline
   audit; changing them would invalidate snapshot reconstruction.
 - `current_compounds` is the authoritative view for current scores plus original
@@ -49,7 +58,7 @@ policies remain available for reproducing the evidence baseline.
   Use these for new analyses, not the baseline `compounds` table.
 - `scenario_metadata` records the new run, policy, source hashes and code hashes.
   Original `run_metadata` continues to describe the retained baseline archive.
-- `PlastPrior_dashboard.sqlite` exposes current scores through `compound_audit`,
+- `PlastIQ_dashboard.sqlite` exposes current scores through `compound_audit`,
   retains baseline scoring separately, and is paired to the new CSV by SHA-256.
 - `score_chart_data.csv` contains the same integer scores, labels and ranks for
   downstream plotting. Do not independently round again in R or other plotting code.

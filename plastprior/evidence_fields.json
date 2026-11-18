@@ -618,5 +618,5 @@
       }
     }
   },
-  "interpretation": "Historical database selection does not independently verify chemical identity. Source-native scores and classifications are imported observations, not PlastPrior scores. QSAR identity exceptions exclude prediction evidence only."
+  "interpretation": "Historical database selection does not independently verify chemical identity. Source-native scores and classifications are imported observations, not PlastIQ scores. QSAR identity exceptions exclude prediction evidence only."
 }

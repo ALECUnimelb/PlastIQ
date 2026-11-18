@@ -7,8 +7,9 @@ from pathlib import Path
 import shutil
 import sqlite3
 from .result_storage import install_package
+from .result_names import CURRENT, result_files
 
-DAILY_NAMES = ('PlastPrior_results.csv', 'PlastPrior_dashboard.sqlite')
+DAILY_NAMES = (CURRENT['publication'], CURRENT['dashboard'])
 
 
 def sha256(path):
@@ -71,7 +72,7 @@ def publish_daily(package, results_dir, archive_root, *, baseline_csv=None):
             raise ValueError('Result CSV/database mismatch.')
         if int(meta['row_count']) != db.execute('SELECT count(*) FROM compound_audit').fetchone()[0]:
             raise ValueError('Result row count mismatch.')
-    baseline = Path(baseline_csv) if baseline_csv else results / DAILY_NAMES[0]
+    baseline = Path(baseline_csv) if baseline_csv else result_files(results, required=())['publication']
     regression = compare_csv(baseline, csv_path) if baseline.is_file() else None
     # The low-level export nests the browser projection; the current result
     # directory presents the CSV and both databases together at its root.

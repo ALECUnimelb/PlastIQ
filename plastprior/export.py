@@ -2,6 +2,7 @@
 
 This module does not calculate scores, change policies, or remove stage outputs.
 """
+from .result_names import CURRENT, DICTIONARY_NAME
 from collections import OrderedDict
 from contextlib import closing
 import csv
@@ -647,15 +648,15 @@ def export_results(results_dir, output_dir=None, *, progress=None):
     stage_count = len(artifacts)
     # Preserve the actual local implementation/configuration, including uncommitted changes.
     software = sorted(p for p in (project / 'plastprior').iterdir() if p.suffix in ('.py', '.json'))
-    software += [project / name for name in ('main.py', 'PlastPrior.ipynb', 'requirements.txt')]
+    software += [project / name for name in ('main.py', 'PlastIQ.ipynb', 'requirements.txt')]
     for path in software:
         artifacts[path] = _hash(path)
     destination.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix='.export-', dir=destination.parent) as temporary:
         staging = Path(temporary) / 'package'
         staging.mkdir()
-        csv_path = staging / 'PlastPrior_results.csv'
-        db_path = staging / 'PlastPrior_results.sqlite'
+        csv_path = staging / CURRENT['publication']
+        db_path = staging / CURRENT['analysis']
         with closing(sqlite3.connect(db_path)) as db:
             _schema(db)
             db.execute('PRAGMA user_version=2')
@@ -753,5 +754,5 @@ def export_results(results_dir, output_dir=None, *, progress=None):
     notify('Verified final package: ' + str(destination))
     return {'directory': destination, 'csv': destination / csv_path.name,
             'sqlite': destination / db_path.name,
-            'dashboard_sqlite': destination / 'dashboard' / 'PlastPrior_dashboard.sqlite',
-            'dictionary': destination / 'PlastPrior_data_dictionary.csv', **validation}
+            'dashboard_sqlite': destination / 'dashboard' / CURRENT['dashboard'],
+            'dictionary': destination / DICTIONARY_NAME, **validation}

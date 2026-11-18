@@ -21,7 +21,7 @@ if errorlevel 1 goto failed
 if errorlevel 1 goto failed
 ".venv\Scripts\python.exe" -X utf8 -c "from rdkit import Chem; assert Chem.MolToInchiKey(Chem.MolFromSmiles('CCO')) == 'LFQSCWFLJHTTHZ-UHFFFAOYSA-N', 'RDKit InChI support is required'"
 if errorlevel 1 goto failed
-".venv\Scripts\python.exe" -X utf8 -m ipykernel install --sys-prefix --name plastprior --display-name "PlastPrior (Python 3.12)"
+".venv\Scripts\python.exe" -X utf8 -m ipykernel install --sys-prefix --name plastprior --display-name "PlastIQ (Python 3.12)"
 if errorlevel 1 goto failed
 echo Setup complete. Place the frozen inputs in data, then run run_windows.cmd.
 popd

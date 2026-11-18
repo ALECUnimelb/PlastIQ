@@ -1,14 +1,9 @@
-> Output-layout update: daily files are `results/PlastPrior_results.csv` and
-
-> Current scoring-policy update: [zero-contribution policy](zero_contribution_policy.md)
-> supersedes the complete-domain eligibility rule and its recorded 4,244/10,881
-> verification counts below. Those dated results describe the earlier export,
-> not the repaired candidate. Upstream evidence admission remains unchanged.
-
-> `results/PlastPrior_dashboard.sqlite`. Complete archives and temporary stages are
-> separate under `audit_archive/<run>/`. Stage-level paths in historical examples below
-> refer to `<run>/work/`; retain them with `--keep-intermediates` when reproducing checks.
-> See [output layout](results_layout.md) and [family classification](chemical_families.md).
+> Current delivery layout: `result/PlastIQ_results.csv`,
+> `result/PlastIQ_results.sqlite` and `result/PlastIQ_dashboard.sqlite`.
+> Builds use temporary staging and replace one complete current set after validation.
+> Historical stage paths and validation counts below retain their original meaning.
+> See [result storage](results_layout.md), [current scoring rules](pbmt_three_level_scoring.md)
+> and [the naming compatibility contract](branding.md).
 
 # Methods and stage reference
 
@@ -32,19 +27,19 @@ standalone checks available from a clone of the code repository alone.
 ## Final results
 
 After Stage 7B, the notebook and `python main.py --rank-priority` use the same
-`plastprior.export.export_results()` function. Each successful export creates a
-new directory under `results/final/<run_id>/`:
+`plastprior.export.export_results()` function. The low-level exporter builds a temporary package; delivery validates and
+replaces the complete current `result/` directory:
 
-- `PlastPrior_results.csv`: a 60-field publication table, including incomplete
+- `PlastIQ_results.csv`: a 60-field publication table, including incomplete
   and unranked records. Identity, source memberships, selected hazard pathways,
   exposure quantities/context, scores, ranks and missingness are explicit.
   Internal identity/GIC flags and detailed reasons remain in the archive.
-- `PlastPrior_results.sqlite`: complete final analysis (all original fields),
+- `PlastIQ_results.sqlite`: complete final analysis (all original fields),
   historical final results, source records and membership links, retained audit
   decisions, shared evidence bodies and sparse intermediate differences.
-- `PlastPrior_data_dictionary.csv` and `README.md`: field meanings, source-field
+- `PlastIQ_data_dictionary.csv` and `README.md`: field meanings, source-field
   mapping, units, missingness, scoring policies and read-only access examples.
-- `dashboard/PlastPrior_dashboard.sqlite`: all final compound fields plus display
+- `dashboard/PlastIQ_dashboard.sqlite`: all final compound fields plus display
   aliases, without the multi-million-row intermediate audit. CSV SHA-256 and row
   count bind this projection to the exact publication file. It is not a substitute
   for the complete archive.
@@ -173,7 +168,7 @@ establish redistribution permission.
 ## Input inspection
 
 `plastprior/inputs.py` is the single implementation used by `main.py` and
-`PlastPrior.ipynb`. It reads the 12 declared source files, checks the required
+`PlastIQ.ipynb`. It reads the 12 declared source files, checks the required
 column labels, and reports dimensions for 14 selected source-native tables:
 two identity-reference tables, 11 inventory tables, and one literature-to-chemical
 link table. The catalog is `plastprior/sources.json`.
@@ -440,7 +435,15 @@ inventory; 15,125 chemical identities remain distinct. The compound projection
 reproduces the 59 retained historical QSAR/basic fields. Ready Biodegradability
 is present in the raw model table but was not selected into that historical
 compound projection; its predictions are not silently substituted for another
-endpoint. No hazard score or common ADI cutoff is applied here.
+endpoint. The current evidence-only delivery additionally joins these original
+Ready Biodegradability fields through the validated frozen QSAR mapping and
+exports `Persistence_evidence.ready_biodegradability` plus explicit
+`Ready_Biodegradability_*` columns. This supplemental object is for display only;
+identity-review cases, model errors, missing ADI and explicit reliability remain
+distinct. It does not replace water/soil/sediment endpoints or enter scoring.
+The immutable historical projection is retained. See [evidence delivery and
+Dashboard contract](evidence_delivery.md) for fields, provenance, coverage and
+required Sankey packaging. No hazard score or common ADI cutoff is applied here.
 
 The Mutagenicity CONSENSUS report supplies Assessment but no ADI. Its ADI is
 explicitly listed as absent, never invented as zero. Numeric missing tokens,
@@ -675,7 +678,7 @@ are recorded; no code is imported from the old repository at runtime.
 same functions. No specialist LitChemPlast/FCChumon resolver, analytical
 detectability annotation, GIC integration, or downstream score is executed.
 Source-native scores such as PlastChem Hazard_score remain observations with
-source links; they are neither recalculated nor treated as PlastPrior scores.
+source links; they are neither recalculated nor treated as PlastIQ scores.
 
 **Selection rules.** Each Stage 2 member queries its original source using
 InChIKey, then CAS, then SMILES. Comparisons use trimmed, case-insensitive exact

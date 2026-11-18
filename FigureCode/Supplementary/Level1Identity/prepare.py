@@ -12,13 +12,16 @@ from rdkit import Chem, rdBase
 from rdkit.Chem import inchi
 
 ROOT = Path(__file__).resolve().parents[3]
+import sys
+sys.path.insert(0, str(ROOT))
+from plastprior.result_names import result_file, result_files
 MODULE = ROOT / 'FigureCode/Supplementary/Level1Identity'
 import os
 if 'PLASTPRIOR_CLASSIFICATION_STAGE' not in os.environ:
     raise SystemExit('Provide PLASTPRIOR_CLASSIFICATION_STAGE for temporary classification preparation; current figure data are immutable inputs.')
 DATA = Path(os.environ['PLASTPRIOR_CLASSIFICATION_STAGE'])
 INPUT = ROOT / 'result/figure_data/_dependencies/Level1_101_aligned_uses_en.csv'
-RESULT = ROOT / 'result/PlastPrior_results.csv'
+RESULT = Path(os.environ['PLASTPRIOR_PUBLICATION']) if 'PLASTPRIOR_PUBLICATION' in os.environ else result_file(ROOT / 'result', 'publication')
 POLICY = ROOT / 'FigureCode/_shared/five_level_policy.json'
 GROUPS = {
  'hal_non_aromatic': 'Halogenated non-aromatics',
@@ -69,7 +72,7 @@ def classify(mol):
 def main():
     DATA.mkdir(parents=True, exist_ok=True)
     hashes = {str(p.relative_to(ROOT)): sha(p) for p in (INPUT, RESULT, POLICY)}
-    lock = json.loads((ROOT / 'FigureCode/managed_sources.json').read_text())
+    lock = json.loads(Path(os.environ.get('PLASTPRIOR_SOURCE_LOCK', ROOT / 'FigureCode/managed_sources.json')).read_text())
     assert sha(RESULT) == lock['files']['publication']['sha256']
     inputs, full = read(INPUT), read(RESULT)
     lookup = {r['inchikey']: r for r in full}

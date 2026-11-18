@@ -9,7 +9,7 @@ output_dir <- args[[1]]
 for(f in c('palette.R','theme.R','export.R','validation.R')) source(file.path(shared_dir,f))
 library(ggplot2)
 library(patchwork)
-lock <- jsonlite::fromJSON(file.path(figures_dir,'managed_sources.json'),simplifyVector=FALSE)
+lock <- jsonlite::fromJSON(Sys.getenv('PLASTPRIOR_SOURCE_LOCK',file.path(figures_dir,'managed_sources.json')),simplifyVector=FALSE)
 figure_policy <- jsonlite::fromJSON(file.path(repo_root,lock$policy$path),simplifyVector=FALSE)
 db <- NULL
 if (Sys.getenv("PLASTPRIOR_FIGURE_PHASE") == "prepare") db <- DBI::dbConnect(RSQLite::SQLite(),file.path(repo_root,lock$files$analysis$path),flags=RSQLite::SQLITE_RO)

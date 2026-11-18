@@ -5,6 +5,7 @@ import hashlib
 import os
 import shutil
 import tempfile
+from .result_names import CURRENT, LEGACY, NAMES, result_files, canonicalise_names
 
 
 def validate_destination(destination):
@@ -47,14 +48,22 @@ database replacement path.
         return
     if destination.is_symlink():
         raise ValueError('Result must be a real directory, not a version-selection link')
-    dependencies = ('PlastPrior_results.csv', 'PlastPrior_results.sqlite',
-                    'PlastPrior_dashboard.sqlite', 'figure_data/_metadata/scoring_config.json')
-    changed = [name for name in dependencies
-               if (destination/name).exists() and (candidate/name).exists()
-               and sha(destination/name) != sha(candidate/name)]
+    old = result_files(destination, required=())
+    new = result_files(candidate, required=())
+    pairs = [(old[role], new[role]) for role in CURRENT]
+    pairs.append((destination/'figure_data/_metadata/scoring_config.json',
+                  candidate/'figure_data/_metadata/scoring_config.json'))
+    changed = [a.name for a, b in pairs if a.exists() and b.exists() and sha(a) != sha(b)]
     if (destination/'figures').exists() and changed:
         raise ValueError('Dependent figure data require a coordinated refresh before replacing result; current files are unchanged.')
-    copy_missing(destination, candidate)
+    # Map only the current root entries. Immutable baselines keep their names.
+    aliases = dict(zip(LEGACY.values(), CURRENT.values()))
+    for item in destination.iterdir():
+        target = candidate / aliases.get(item.name, item.name)
+        if item.is_dir():
+            copy_missing(item, target)
+        elif not target.exists():
+            shutil.copy2(item, target)
 
 
 def copy_missing(source, target):
@@ -70,8 +79,8 @@ def copy_missing(source, target):
 def normalise_package(directory):
     """Keep the public result root limited to the agreed fixed deliverables."""
     directory = Path(directory)
-    public = {'PlastPrior_results.csv','PlastPrior_results.sqlite',
-              'PlastPrior_dashboard.sqlite','figure_data','figures','Figures.pptx'}
+    canonicalise_names(directory)
+    public = {*NAMES, 'figure_data','figures','Figures.pptx'}
     decks = [p for p in directory.iterdir() if p.suffix.lower() == '.pptx' and not p.name.startswith('~$')]
     if len(decks) > 1: raise ValueError('Keep only one current presentation in result')
     public.update(p.name for p in decks)
@@ -128,6 +137,9 @@ def install_package(package, destination):
             normalise_package(stage)
             merge_existing(stage, destination)
             normalise_package(stage)
+            if destination == Path(__file__).resolve().parents[1]/'result':
+                from .evidence_release import validate_delivery
+                validate_delivery(stage)
             replace_directory(stage, destination)
         finally:
             if stage.exists():

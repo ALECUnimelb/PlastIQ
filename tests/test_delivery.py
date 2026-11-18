@@ -30,7 +30,7 @@ class DeliveryTests(unittest.TestCase):
         manifest = publish_daily(self.package, self.results, self.archive)
         self.assertFalse(self.results.is_symlink())
         self.assertTrue(set(DAILY_NAMES) <= {p.name for p in self.results.iterdir()})
-        self.assertTrue((self.results/'PlastPrior_results.sqlite').is_file())
+        self.assertTrue((self.results/'PlastIQ_results.sqlite').is_file())
         self.assertEqual((self.results/'figure_data/_dependencies/important.txt').read_text(), 'old evidence')
         self.assertFalse(list(self.archive.glob('legacy-results-*')))
         self.assertEqual(len(manifest['daily_files']), 2)

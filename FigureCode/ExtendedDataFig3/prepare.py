@@ -10,6 +10,9 @@ import numpy as np
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[2]
+import sys
+sys.path.insert(0, str(ROOT))
+from plastprior.result_names import result_file, result_files
 MODULE = ROOT / 'FigureCode/ExtendedDataFig3'
 sys.path.insert(0, str(ROOT / 'FigureCode/_shared'))
 from managed import verify_sources, sha, write_json
@@ -24,7 +27,6 @@ LABELS = {
 STATUS = ['prohibited_or_phaseout', 'restricted_or_authorisation_required',
  'candidate_or_high_concern', 'monitoring_reporting_or_hazard_classification',
  'inventory_registration_or_use_only', 'not_listed']
-PROTECTED = ['PlastPrior_results.csv', 'PlastPrior_results.sqlite', 'PlastPrior_dashboard.sqlite']
 
 def round_ratio(num, den):
     return ((2 * num + den) // (2 * den)).astype(np.int64)
@@ -54,10 +56,11 @@ def main(stage):
     stage.mkdir(parents=True, exist_ok=True)
     tables = stage/'source_data'; tables.mkdir(exist_ok=True)
     profile = verify_sources()
-    protected = {f: sha(ROOT/'result'/f) for f in PROTECTED}
+    result_dir = (ROOT/profile['files']['publication']['path']).parent
+    protected = {p.name: sha(p) for p in result_files(result_dir).values()}
     policy = json.loads((ROOT/'plastprior/scenario_policy.json').read_text())
     five = json.loads((ROOT/'FigureCode/_shared/five_level_policy.json').read_text())
-    data = pd.read_csv(ROOT/'result/PlastPrior_results.csv', keep_default_na=True)
+    data = pd.read_csv(result_file(result_dir, 'publication'), keep_default_na=True)
     assert len(data) == 15125 and data.inchikey.is_unique
     assert set(data.GIC_regulatory_status) <= set(STATUS)
     hc = ['Persistence_score','Bioaccumulation_score','Mobility_score','Toxicity_score']
@@ -173,7 +176,7 @@ def main(stage):
                 recorded=metrics[(metrics.scenario==s['id'])&(metrics.endpoint==endpoint)&(metrics.budget_pct==budget)].iloc[0]
                 assert abs(hit-recorded.expected_hits)<1e-8
                 assert abs(capture(s['score'],target,100)['capture_pct']-100)<1e-8
-    assert all(sha(ROOT/'result'/f)==h for f,h in protected.items())
+    assert all(sha(result_dir/f)==h for f,h in protected.items())
     config=dict(population=len(data),endpoints={k:int(v.sum()) for k,v in targets.items()},
       source=profile,protected_hashes=protected,policy=policy,five_level_policy=five,
       components=cols,component_labels=LABELS,scenarios=configs,

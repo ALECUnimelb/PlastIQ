@@ -110,7 +110,7 @@ const definitions=[
  ['Data run',metadata.run_id],['Figure policy',metadata.policy_version],
  ['Domain label cutpoints',`L <${metadata.cutpoints[0]}; M ≥${metadata.cutpoints[0]} and <${metadata.cutpoints[1]}; H ≥${metadata.cutpoints[1]} and <${metadata.cutpoints[2]}; vH ≥${metadata.cutpoints[2]}.`],
  ['Publication CSV SHA-256',metadata.source_csv_sha256],['Use annotations SHA-256',metadata.annotation_sha256],
- ['Source files','PlastPrior_results.csv, scoring_config.json and the paired scenario manifest; supplied use annotations and the five-level figure policy.'],
+ ['Source files','PlastIQ_results.csv, scoring_config.json and the paired scenario manifest; supplied use annotations and the five-level figure policy.'],
  ['Refresh findings',`${payload.changes.unclassified.length} compounds await classification; ${payload.changes.issues.filter(x=>x.issue.startsWith('Identity')).length} identity-label changes require review.`],
 ];
 const defEnd=definitions.length+4;

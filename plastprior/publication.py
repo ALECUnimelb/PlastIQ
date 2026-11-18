@@ -3,6 +3,7 @@
 The archive remains the scientific record. This module selects and documents
 reader-facing fields, retaining source lexemes and explicit missingness.
 """
+from .result_names import CURRENT, DICTIONARY_NAME
 from contextlib import closing
 import csv
 import hashlib
@@ -78,13 +79,13 @@ def write_publication(db, directory, run_id):
     directory = Path(directory)
     from .family_export import annotate_archive
     family_summary = annotate_archive(db)
-    csv_path = directory / 'PlastPrior_results.csv'
+    csv_path = directory / CURRENT['publication']
     db.execute('CREATE TABLE publication_results (' + ','.join(
         _quote(f) + (' TEXT PRIMARY KEY' if f == 'inchikey' else ' TEXT NOT NULL')
         for f in FIELDS) + ')')
     dashboard = directory / 'dashboard'
     dashboard.mkdir()
-    detail_path = dashboard / 'PlastPrior_dashboard.sqlite'
+    detail_path = dashboard / CURRENT['dashboard']
     n = 0
     with closing(sqlite3.connect(detail_path)) as detail:
         detail.execute('CREATE TABLE metadata (key TEXT PRIMARY KEY,value TEXT NOT NULL)')
@@ -156,7 +157,7 @@ def write_publication(db, directory, run_id):
                 raise ValueError('Publication CSV/archive projection differs.')
         if next(reader, None) is not None:
             raise ValueError('Extra publication rows.')
-    dictionary_path = directory / 'PlastPrior_data_dictionary.csv'
+    dictionary_path = directory / DICTIONARY_NAME
     with dictionary_path.open('w', encoding='utf-8', newline='') as stream:
         columns = ['field', 'source_field', 'type', 'unit', 'definition', 'missing', 'transform']
         writer = csv.DictWriter(stream, fieldnames=columns, lineterminator='\n')
@@ -183,16 +184,16 @@ def write_publication(db, directory, run_id):
 def _readme(run_id, count):
     policy = json.loads(Path(__file__).with_name('priority_policy.json').read_text())
     exposure = json.loads(Path(__file__).with_name('exposure_policy.json').read_text())
-    return f'''# PlastPrior publication results
+    return f'''# PlastIQ publication results
 
 Run: `{run_id}`. Publication format: `{FORMAT}`. {count:,} compounds, {len(FIELDS)} columns.
 
 ## Files and use
 
-- `PlastPrior_results.csv`: one row per full InChIKey, including unranked compounds.
-- `PlastPrior_data_dictionary.csv`: definitions, units, missingness and archive field mappings.
-- `PlastPrior_results.sqlite`: complete compact scientific archive and source traceability.
-- `dashboard/PlastPrior_dashboard.sqlite`: browser detail projection, containing every final
+- `PlastIQ_results.csv`: one row per full InChIKey, including unranked compounds.
+- `PlastIQ_data_dictionary.csv`: definitions, units, missingness and archive field mappings.
+- `PlastIQ_results.sqlite`: complete compact scientific archive and source traceability.
+- `dashboard/PlastIQ_dashboard.sqlite`: browser detail projection, containing every final
   compound field, family annotations, and linked source identity details. Resolution tiers
   describe lookup precedence, not measured identification confidence. Source details retain
   mapped identity fields and row locators, not every native database column.
@@ -247,12 +248,12 @@ versions are embedded under `artifacts`. Consult the project's data-access docum
 for source citations and distribution scope before public deposition. Generating this package
 does not assert that every upstream source can be redistributed without conditions.
 
-Example read-only audit (standard Python, no PlastPrior installation needed for final fields):
+Example read-only audit (standard Python, no PlastIQ installation needed for final fields):
 
 ```python
 import sqlite3
 from pathlib import Path
-path = Path("PlastPrior_results.sqlite").resolve()
+path = Path("PlastIQ_results.sqlite").resolve()
 with sqlite3.connect(path.as_uri() + "?mode=ro", uri=True) as db:
     row = db.execute("SELECT * FROM compounds WHERE inchikey = ?", ("FULL-INCHIKEY",)).fetchone()
     links = db.execute("SELECT * FROM compound_memberships WHERE inchikey = ?", ("FULL-INCHIKEY",)).fetchall()

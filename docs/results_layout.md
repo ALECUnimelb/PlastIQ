@@ -2,9 +2,9 @@
 
 `result/` is the only persistent generated-result location. Its public entries are:
 
-- `PlastPrior_results.csv`
-- `PlastPrior_results.sqlite`
-- `PlastPrior_dashboard.sqlite`
+- `PlastIQ_results.csv`
+- `PlastIQ_results.sqlite`
+- `PlastIQ_dashboard.sqlite`
 - `figure_data/`: one numerical input set per figure
 - `figures/`: flat PNG/PDF images and current SI workbook
 - `Figures.pptx` by default: the single review presentation, replaced on update.

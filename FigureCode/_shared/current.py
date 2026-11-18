@@ -1,4 +1,4 @@
-"""Build one figure from the explicitly locked PlastPrior analysis export."""
+"""Build one figure from the explicitly locked PlastIQ analysis export."""
 from pathlib import Path
 import argparse
 import hashlib
@@ -25,7 +25,7 @@ def verify_sources():
     source = json.loads((FIGURES / 'figure_sources.json').read_text())
     for record in source['files'].values():
         if sha(ROOT / record['path']) != record['sha256']:
-            raise ValueError('Locked PlastPrior source changed: ' + record['path'])
+            raise ValueError('Locked PlastIQ source changed: ' + record['path'])
     for name, fingerprint in source['policies'].items():
         if sha(ROOT / 'plastprior' / name) != fingerprint:
             raise ValueError('Analysis policy differs from figure lock: ' + name)

@@ -27,7 +27,7 @@ def write_json(path,value):
     path.write_text(json.dumps(value,ensure_ascii=False,indent=2)+'\n')
 
 def source_profile():
-    profile = json.loads((FIGURES/'managed_sources.json').read_text())
+    profile = json.loads(Path(os.environ.get('PLASTPRIOR_SOURCE_LOCK', FIGURES/'managed_sources.json')).read_text())
     profile['policy']['sha256'] = sha(ROOT/profile['policy']['path'])
     return profile
 
@@ -48,6 +48,7 @@ def code_hashes(folder):
              and not any(part in {'output','review','reference','audit','inputs','__pycache__'} or part.startswith('.') for part in p.relative_to(folder).parts)]
     paths += [FIGURES/'_shared'/n for n in ('publication.py','result_paths.py','managed.py','managed.R','plot_data.R','preparation.py','five_level_policy.json','palette.R','theme.R','export.R','validation.R')]
     paths.append(FIGURES/'publication_order.json')
+    paths.append(ROOT/'plastprior/result_names.py')
     return {str(p.relative_to(ROOT)):sha(p) for p in sorted(paths)}
 
 def paths_for(figure,state):

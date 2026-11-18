@@ -16,7 +16,7 @@ running. The code repository alone does not supply the required data.
 
 Use the installation commands in the [README](../README.md#installation), with
 64-bit Python 3.12 and Git. The notebook kernel is named `plastprior` and displayed
-as **PlastPrior (Python 3.12)**. Run Jupyter from the project environment and the
+as **PlastIQ (Python 3.12)**. Run Jupyter from the project environment and the
 project root. RDKit must match the declared version and provide InChI support.
 
 If environment activation is unavailable, invoke its Python directly:
@@ -72,7 +72,7 @@ For unattended Notebook execution, keep its executed copy outside the daily fold
 
 ```sh
 mkdir -p audit_archive/notebook_execution
-python -m jupyter nbconvert --execute --to notebook --ExecutePreprocessor.kernel_name=plastprior --ExecutePreprocessor.timeout=1800 --output PlastPrior.executed --output-dir audit_archive/notebook_execution PlastPrior.ipynb
+python -m jupyter nbconvert --execute --to notebook --ExecutePreprocessor.kernel_name=plastprior --ExecutePreprocessor.timeout=1800 --output PlastIQ.executed --output-dir audit_archive/notebook_execution PlastIQ.ipynb
 ```
 
 The timeout is per cell. Export can take several minutes. Original frozen queries and
@@ -86,9 +86,9 @@ This resumes from verified Stage 7A outputs without recalculating earlier stages
 
 ```text
 result/
-  PlastPrior_results.csv
-  PlastPrior_results.sqlite
-  PlastPrior_dashboard.sqlite
+  PlastIQ_results.csv
+  PlastIQ_results.sqlite
+  PlastIQ_dashboard.sqlite
   figures/                            # current flat images and SI workbook
   figure_data/                        # paired tables, metadata and dependencies
   Figures.pptx                        # single current review deck
@@ -176,8 +176,8 @@ def readonly(path):
     return connection
 
 from plastprior.delivery import compare_csv
-compare_csv(reference / "PlastPrior_results.csv", candidate / "PlastPrior_results.csv")
-with closing(readonly(reference / "PlastPrior_results.sqlite")) as old, closing(readonly(candidate / "PlastPrior_results.sqlite")) as new:
+compare_csv(reference / "PlastIQ_results.csv", candidate / "PlastIQ_results.csv")
+with closing(readonly(reference / "PlastIQ_results.sqlite")) as old, closing(readonly(candidate / "PlastIQ_results.sqlite")) as new:
     for table in ("compounds", "historical_results", "source_records", "compound_memberships"):
         assert old.execute(f"PRAGMA table_info({table})").fetchall() == new.execute(f"PRAGMA table_info({table})").fetchall(), table
         query = f"SELECT * FROM {table} ORDER BY _row_number"

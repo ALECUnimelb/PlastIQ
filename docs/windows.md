@@ -10,12 +10,12 @@ Install **64-bit Python 3.12**, including its `py` launcher, and **Git for Windo
 Open a new terminal after installation. From a writable parent directory:
 
 ```text
-git clone https://github.com/ALECUnimelb/PlastPrior.git
-cd PlastPrior
+git clone https://github.com/ALECUnimelb/PlastPrior.git PlastIQ
+cd PlastIQ
 .\setup_windows.cmd
 ```
 
-Use a reasonably short project path, such as `C:\Research\PlastPrior`.
+Use a reasonably short project path, such as `C:\Research\PlastIQ`.
 The setup script creates `.venv`, installs the pinned direct dependencies, checks
 RDKit InChI support, and registers the Jupyter kernel. Internet access is needed
 for installation, including the pinned GIC Git dependency. No activation script
@@ -27,7 +27,7 @@ also use 64-bit Python 3.12; the script stops if it does not.
 Extract the supplied data package with this layout (avoid `data\data\`):
 
 ```text
-PlastPrior\
+PlastIQ\
   main.py
   run_windows.cmd
   data\
@@ -67,9 +67,9 @@ The three current deliverables are installed together in the real `result`
 directory, without a symlink:
 
 ```text
-result\PlastPrior_results.csv
-result\PlastPrior_results.sqlite
-result\PlastPrior_dashboard.sqlite
+result\PlastIQ_results.csv
+result\PlastIQ_results.sqlite
+result\PlastIQ_dashboard.sqlite
 ```
 
 Metadata and supporting files are under `result\figure_data`. A successful run
@@ -86,7 +86,7 @@ After setup, launch Jupyter with the project interpreter:
 .\.venv\Scripts\python.exe -X utf8 -m jupyterlab
 ```
 
-Open `PlastPrior.ipynb`, select **PlastPrior (Python 3.12)**, set `DATA_ROOT` if
+Open `PlastIQ.ipynb`, select **PlastIQ (Python 3.12)**, set `DATA_ROOT` if
 needed, restart the kernel and run all cells. Run either the Notebook or CLI,
 not both concurrently.
 

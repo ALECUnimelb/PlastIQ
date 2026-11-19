@@ -10,7 +10,7 @@ Install **64-bit Python 3.12**, including its `py` launcher, and **Git for Windo
 Open a new terminal after installation. From a writable parent directory:
 
 ```text
-git clone https://github.com/ALECUnimelb/PlastPrior.git PlastIQ
+git clone https://github.com/ALECUnimelb/PlastIQ.git
 cd PlastIQ
 .\setup_windows.cmd
 ```
@@ -54,7 +54,7 @@ by the required manifests. Then run:
 For data kept outside the checkout, quote its path:
 
 ```text
-.\run_windows.cmd --data-root "D:\Research data\PlastPrior inputs"
+.\run_windows.cmd --data-root "D:\Research data\PlastIQ inputs"
 ```
 
 The launcher runs input inspection, all prerequisite analysis stages, Top-100

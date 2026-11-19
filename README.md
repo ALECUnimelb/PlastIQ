@@ -1,12 +1,13 @@
 # PlastIQ
 
-The project’s public name is **PlastIQ**. The Python package and data-format
-identifiers remain `plastprior` for compatibility. Current deliveries use
-`PlastIQ_*`; complete legacy `PlastPrior_*` sets remain readable. See the
-[naming and migration contract](docs/branding.md).
+PlastIQ integrates chemical identity, hazard and exposure evidence to
+prioritise plastic-associated chemicals. It produces prioritisation results
+and supporting evidence for analysis, visualisation and review in the PlastIQ
+Dashboard.
 
-The existing [GitHub repository](https://github.com/ALECUnimelb/PlastPrior)
-retains its old URL until the separate repository rename is completed.
+[Source code](https://github.com/ALECUnimelb/PlastIQ) ·
+[Installation and reproduction](docs/reproduction.md) ·
+[Methods](docs/methods.md)
 
 ## PBMT and exposure scoring update (2026-11-16)
 
@@ -32,10 +33,6 @@ are documented in [docs/rounded_scoring.md](docs/rounded_scoring.md). Use
 export and manuscript figures remain the frozen baseline.
 
 
-PlastIQ integrates chemical identity, hazard and exposure evidence to
-prioritise plastic-associated chemicals. It produces a CSV summary and a SQLite
-database containing complete final results, source links and audit records.
-
 **Status:** the seven-stage workflow and final export have passed a local full
 Notebook run and comparison with frozen results. Public access to all exact
 inputs, distribution decisions, code licensing and independent installation
@@ -44,7 +41,7 @@ reproduction package.
 
 ## Start here
 
-For this local project, work in `/Users/ruiwang/Projects/APPs/PlastPrior`.
+Run commands from the repository root.
 Current data are in `result/`; generated figures and decks are in
 `result/figures/` and the single `result/Figures.pptx`. Source code remains in `FigureCode/`. See [workspace location and migration checks](docs/workspace_location.md).
 
@@ -195,7 +192,7 @@ See [the current scoring policy](docs/zero_contribution_policy.md).
 The low-level exporter creates a staged package; delivery replaces the complete
 current result directory after validation. Successful temporary stages are removed.
 
-For the updated ChemicalPrioDashboard, load `PlastIQ_results.csv` followed by
+For the PlastIQ Dashboard, load `PlastIQ_results.csv` followed by
 `PlastIQ_dashboard.sqlite` from the same export. The full archive
 is for offline audit, not browser import. The display adapter preserves absent
 formal scores and uses the selected literature source. The scientific archive
@@ -232,6 +229,8 @@ their different file hashes as interchangeable.
 
 The scientific implementation is in `plastprior/`; `main.py` and the root
 Notebook provide interfaces. Source tests are retained in `tests/`.
+Technical details for existing integrations and older datasets are documented
+in the [compatibility guide](docs/branding.md).
 
 ```text
 python -m unittest discover -s tests -v

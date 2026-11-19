@@ -78,12 +78,11 @@ path resolution. Do not fill historical hashes merely to make review pass.
 
 ## GitHub and Dashboard handoff
 
-The original repository is still `ALECUnimelb/PlastPrior` until a separately
-approved repository rename is performed with an administrator login. Keep the
-same owner, repository ID, history and access settings. After that rename, update
-`origin`, the actual clone URL in the Windows guide, the README repository link,
-repository description and any external archive or manuscript links. Do not
-change a working clone URL to a nonexistent destination in advance.
+The repository is [ALECUnimelb/PlastIQ](https://github.com/ALECUnimelb/PlastIQ).
+It was renamed on 19 November 2026 under the same owner, retaining the existing
+repository and commit history. Use the current URL for clones, remotes,
+manuscript references and external archive links. The canonical local workspace
+and internal compatibility identifiers remain unchanged.
 
 The Dashboard already uses PlastIQ in its interface. Its runtime identifies
 data by format, CSV SHA-256 and row count, not the uploaded basename. No protocol

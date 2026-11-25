@@ -197,8 +197,12 @@ version and scoring configuration used, and cite the original evidence sources.
 Formal manuscript and archived-software citation details have not yet been added
 to this repository.
 
-PlastIQ source code is released under the [MIT License](LICENSE),
-Copyright (c) 2026 The University of Melbourne. The PlastIQ Dashboard is a
+PlastIQ source code is released under a custom
+[non-commercial research licence](LICENSE), Copyright (c) 2026 The University of
+Melbourne. Use, modification and redistribution for non-commercial research are
+permitted; redistribution must include source code and retain the same terms and
+notices. Commercial use or closed-source redistribution requires written
+permission. The PlastIQ Dashboard is a
 publicly accessible web interface and is not part of this source release.
 Third-party software and source datasets retain their respective terms and
 attribution requirements; see the [source documentation](docs/data_distribution_checklist.md).

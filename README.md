@@ -1,75 +1,84 @@
 # PlastIQ
 
-PlastIQ integrates chemical identity, hazard and exposure evidence to
-prioritise plastic-associated chemicals. It produces prioritisation results
-and supporting evidence for analysis, visualisation and review in the PlastIQ
-Dashboard.
+PlastIQ is a framework for prioritising plastic-associated chemicals by
+integrating chemical identity, hazard and exposure evidence. It provides
+compound-level scores, priority classifications and traceable supporting evidence
+for screening and subsequent assessment. The companion PlastIQ Dashboard supports
+interactive exploration of the results and review of individual chemicals.
 
 [Source code](https://github.com/ALECUnimelb/PlastIQ) ·
-[Installation and reproduction](docs/reproduction.md) ·
-[Methods](docs/methods.md)
+[Methods](docs/methods.md) ·
+[Input data](docs/data_preparation.md) ·
+[Technical documentation](#documentation)
 
-## PBMT and exposure scoring update (2026-11-16)
+## Scientific approach
 
-The latest implementation supports PBMT scores of 0/1/2 while retaining original
-source scores, and direct exposure rules producing 0/1/2 from selected raw inputs.
-Weights and domain rounding are unchanged. The current exported dataset uses
-`priority-pbmt-exposure-rules-rounded-v1`; see
-[the current rules and migration record](docs/pbmt_three_level_scoring.md).
-Scenario export requires `--three-level-exposure` to select this policy; the
-legacy default is retained and does not select it automatically.
+The workflow combines chemical inventories and supporting evidence through
+structure-based identity resolution, evidence integration and prioritisation.
+Source identifiers, selected evidence and missing-data indicators are retained
+alongside the results.
 
-Git distributes code, tests and configuration only. Obtain the matching current
-CSV and SQLite files separately from the project data share and place them in
-`result/`. Pulling the code does not download or regenerate the result files.
-Historical counts and validation records below describe their named baseline,
-not the current three-level dataset.
+Hazard assessment covers persistence (P), bioaccumulation (B), mobility (M) and
+toxicity (T). Exposure indicators cover food contact, human biomonitoring,
+inventory occurrence, production and market evidence, patents and scientific
+literature. The current scoring policy uses three-level PBMT scores (0, 1 and 2)
+and direct exposure rules with outputs of 0, 1 or 2, while preserving original
+source evidence and missing values.
 
-## Rounded scoring update (2026-10-27)
+Weighted hazard and exposure totals are rounded separately using half-up
+rounding. Their sum determines the priority score and competition rank; a
+hazard–exposure matrix assigns Levels 1–5. Level 1 represents the highest priority.
+Ties at a Top-N boundary are retained. The implemented current policy is
+`priority-pbmt-exposure-rules-rounded-v1`; its rules and provenance are documented
+in the [scoring specification](docs/pbmt_three_level_scoring.md).
 
-Current rounded H/E scores, five-level labels and configurable Dashboard scenarios
-are documented in [docs/rounded_scoring.md](docs/rounded_scoring.md). Use
-`result/` for the new CSV and paired SQLite files; the 2026-10-26
-export and manuscript figures remain the frozen baseline.
+These scores support comparative screening. They do not constitute quantitative
+risk estimates or establish that a chemical originates from plastics. Missing
+evidence contributes zero to score sums but remains explicitly identified;
+a low score therefore does not establish low concern or safety. Interpretation
+requires consideration of evidence coverage, model applicability and sample
+context.
 
+## Data and result files
 
-**Status:** the seven-stage workflow and final export have passed a local full
-Notebook run and comparison with frozen results. Public access to all exact
-inputs, distribution decisions, code licensing and independent installation
-validation remain incomplete. This repository alone is not a complete
-reproduction package.
+This repository contains analysis code, configuration and tests. Research inputs
+and generated results are distributed separately and are not downloaded by
+cloning the repository. Reproduction requires the exact input snapshots and
+scoring configuration associated with the selected analysis. The
+[input specification](docs/data_preparation.md) describes the required files;
+the [source register](docs/data_access_register.json) records provenance and
+source-specific access information.
 
-## Start here
+For access to the matching research data and result package, contact
+[ALEC-Chemistry](mailto:ALEC-Chemistry@unimelb.edu.au). A public data-archive DOI
+is not yet provided in this README.
 
-Run commands from the repository root.
-Current data are in `result/`; generated figures and decks are in
-`result/figures/` and the single `result/Figures.pptx`. Source code remains in `FigureCode/`. See [workspace location and migration checks](docs/workspace_location.md).
-
-| Purpose | Guide |
+| File | Contents and intended use |
 | --- | --- |
-| Prepare the exact input collection | [Data preparation](docs/data_preparation.md) |
-| Install, run and check results | [Reproduction guide](docs/reproduction.md) |
-| Install and run on native Windows | [Windows guide](docs/windows.md) |
-| Inspect scientific rules and stage-level evidence | [Methods and stage reference](docs/methods.md) |
-| Locate the retained local CSV, SQLite and verification records | [Local results storage](docs/results_layout.md) |
-| Review source distribution decisions | [Source-by-source checklist](docs/data_distribution_checklist.md) |
-| Review source access and unresolved release requirements | [Data access review](docs/data_access_review.md) and [publication review](docs/publication_review.md) |
+| `PlastIQ_results.csv` | Compound identities, selected evidence, scores, ranks, priority levels and missing-data indicators |
+| `PlastIQ_dashboard.sqlite` | Detailed compound evidence and packaged figure data for the Dashboard; paired with the CSV by SHA-256 |
+| `PlastIQ_results.sqlite` | Full analysis archive, including current results and retained source and audit records |
+| `figure_data/` | Prepared figure tables, supporting dependencies and provenance metadata |
+| `figures/` | Rendered figures and supplementary visual outputs |
 
-The local result links require the retained files on the reader's machine.
-`data/` and generated `result/` files are excluded from Git. A public result download or an
-approved exact-input acquisition route has not yet been established.
+Place the matching result package in `result/`. To explore it in the PlastIQ
+Dashboard, load the CSV and its paired Dashboard SQLite file from the same
+package. The full analysis database is intended for offline inspection.
+
+In the full analysis database, `current_compounds` and `scenario_results`
+contain the current scenario results. The original `compounds` table is retained
+for baseline provenance and must not be used as a substitute for current scores.
+The [result layout](docs/results_layout.md) and
+[evidence specification](docs/evidence_delivery.md) describe the files and
+embedded evidence in detail.
 
 ## Installation
 
-On Windows, use the [native Windows guide](docs/windows.md): install 64-bit
-Python 3.12 and Git, then run `.\setup_windows.cmd` followed by
-`.\run_windows.cmd` after placing the frozen data. No WSL or environment
-activation is required. The analysis uses a real `result/` directory on every
-platform; native Windows CI and a full data run must confirm the installation.
+Use 64-bit Python 3.12 and Git. From a terminal:
 
-Use 64-bit Python 3.12 and Git. From the project directory:
-
-```text
+```sh
+git clone https://github.com/ALECUnimelb/PlastIQ.git
+cd PlastIQ
 python -m venv .venv
 ```
 
@@ -77,187 +86,128 @@ Activate the environment using the command for your shell:
 
 | Shell | Command |
 | --- | --- |
-| macOS | `source .venv/bin/activate` |
+| macOS / Linux | `source .venv/bin/activate` |
 | Windows Command Prompt | `.venv\Scripts\activate.bat` |
 | Windows PowerShell | `.\.venv\Scripts\Activate.ps1` |
 
-```text
+Then install the declared dependencies:
+
+```sh
 python -m pip install -r requirements.txt
+```
+
+The requirements specify RDKit with InChI support and a pinned Global Inventory
+Compiler Git revision. The similarly named PyPI package is not a substitute.
+Direct dependencies are pinned; the complete transitive environment is not locked.
+For native Windows launchers and platform-specific instructions, see the
+[Windows installation guide](docs/windows.md).
+
+## Reproducing the analysis
+
+### Current scoring
+
+Reproduction of the current scores starts from the matching immutable evidence
+baseline, comprising a CSV and both SQLite databases. The current result CSV
+alone does not contain every raw input needed for rescoring.
+
+Run the following from the repository root, replacing the example paths with the
+baseline location and a new candidate directory in a temporary workspace outside
+the repository:
+
+```sh
+python -m plastprior.scenario_export \
+  --source /path/to/frozen-baseline \
+  --output /path/to/temporary-workspace/candidate \
+  --three-level-exposure
+```
+
+The `--three-level-exposure` option selects both the current PBMT treatment and
+the direct exposure rules. Omitting it selects an earlier scoring policy.
+The source baseline is preserved.
+
+This command creates a data-only candidate for comparison. A complete Dashboard
+and publication package additionally requires figure evidence prepared against
+that same candidate, packaging and validation, as described in the
+[delivery procedure](docs/evidence_delivery.md#future-scenario-exports).
+Validate candidates before replacing `result/`; retain one coordinated current
+result set and remove temporary candidates after verification.
+
+### Evidence reconstruction
+
+To reconstruct the underlying evidence collection, prepare the frozen inputs
+listed in the [data specification](docs/data_preparation.md), then follow the
+[reproduction guide](docs/reproduction.md). The `main.py` workflow and
+`PlastIQ.ipynb` implement this evidence-building pipeline. They retain baseline
+scoring behaviour; running them alone does not select the current scenario
+policy described above.
+
+For the notebook interface, register the kernel and launch JupyterLab:
+
+```sh
 python -m ipykernel install --sys-prefix --name plastprior --display-name "PlastIQ (Python 3.12)"
-```
-
-Git is needed for the pinned Global Inventory Compiler dependency; the PyPI
-package named `gic` is a different project. RDKit 2026.3.1 with InChI support is
-required for identity processing. The workflow reads frozen VEGA reports and
-does not run the VEGA application. See the reproduction guide for environment
-limitations and commands that do not require shell activation.
-
-## Prepare data
-
-Follow the [complete input checklist](docs/data_preparation.md), including the
-frozen `ExposureReference/20261006T233429Z/` bundle. Preserve filenames, table
-layouts and manifest-referenced raw files. No automatic download or input repair
-is implemented. Current online releases are not substitutes for the declared
-frozen files.
-
-An optional initial inspection is:
-
-```text
-python main.py --require-supporting-inputs --output-dir result
-```
-
-This inspects primary tables and auxiliary presence. It does not calculate
-scores or verify every auxiliary file; later stages perform their own checks.
-Without additional options, `python main.py` performs input inspection only.
-Inspection-only runs retain `.result-work`; inspect and remove that temporary
-workspace before starting a new run. For a first complete analysis, skip the
-separate inspection command: the complete workflow performs those checks itself.
-
-## Run the complete workflow
-
-Choose either interface; both call the same scientific modules.
-
-**Notebook:** launch JupyterLab, open `PlastIQ.ipynb` from the project root,
-select **PlastIQ (Python 3.12)**, restart the kernel and run all cells.
-
-```text
 python -m jupyterlab
 ```
 
-The setup cell exposes `DATA_ROOT` and the temporary workspace settings.
-`REPORT_DIR` contains intermediate stages; do not point it at `result/`.
-The final cell validates and installs the complete result set.
+Open `PlastIQ.ipynb` and select **PlastIQ (Python 3.12)**. The workflow reads frozen
+VEGA reports and query outputs; it does not rerun VEGA or retrieve live source
+databases. Exact source versions and supporting files are necessary for
+reproduction.
 
-**Command line:** the ranking option runs every prerequisite stage and final
-export. Use the fixed result directory; delivery validates before replacement.
+## Verification
 
-```text
-python main.py --rank-priority --top-n 100 --require-supporting-inputs --output-dir result
-```
+Run the fixture-based tests from the repository root:
 
-Add `--data-root "path to the frozen data directory"` for external inputs.
-Relative command-line data/output paths resolve from the project root.
-The [reproduction guide](docs/reproduction.md) covers unattended Notebook
-execution, comparison criteria and historical validation requirements.
-
-The last locally verified run executed 17 code cells in about 13 minutes,
-including comparison and preservation checks. Stage files occupied about
-5.87 GB and the final package about 3.32 GB, before temporary files and inputs.
-These are observations on the existing environment, not portable resource
-guarantees. Allow additional disk space and time on other systems.
-
-## Read the results
-
-The current files are in one fixed directory:
-
-```text
-result/
-  PlastIQ_results.csv
-  PlastIQ_results.sqlite
-  PlastIQ_dashboard.sqlite
-  figures/                       # current flat images
-  figure_data/                   # prepared tables, metadata and retained dependencies
-```
-
-Builds use temporary `.result-work/` staging. Successful delivery replaces the
-current result set without accumulating dated runs. Changed data cannot replace
-an existing result with dependent figure tables until a coordinated refresh is
-prepared. See [output layout](docs/results_layout.md) for checks and recovery.
-
-| File or SQLite view | Purpose |
-| --- | --- |
-| CSV | 60-field publication table, including structural family labels: identity, source memberships, selected evidence, scores, ranks and missingness |
-| Data dictionary and README | Definitions, units, null conventions, policy, source tracing and usage |
-| `PlastIQ_dashboard.sqlite` | Browser-sized projection of every final compound field, paired with the CSV by SHA-256 |
-| `publication_results` | Exact text projection of the publication CSV in the full archive |
-| `compounds` | All 251 final fields in the verified collection |
-| `eligible_ranking` | Rankable assessments, including partial evidence with unavailable contributions counted as zero in sums |
-| `top_priority` | Top-N including every boundary tie |
-| `unranked_review` | Records with no available evidence and exclusion reasons |
-| `source_records`, `compound_memberships`, `evidence` | Source and audit tracing |
-
-For ranking queries, use `ORDER BY Priority_rank, inchikey`; SQL views do not
-imply order. Missing numeric values use NULL and remain distinct from valid zero.
-The compact database shares repeated audit bodies and stage values. Its
-[storage contract and decoding helpers](docs/methods.md#final-results) explain
-which parsed records can be reconstructed and which source bytes are external.
-
-The repaired frozen-input analysis contains **15,125 compounds**, all rankable,
-with **265 High**, **3,414 Moderate** and **11,446 Low** priority records under
-`priority-hgt10-ege5-v1` (High: raw H>10 and E>=5).
-**10,881 records remain marked Partial**; missingness does not cancel their
-available contributions. The inclusive Top-100 has 100 compounds at a cutoff of 20 points; all 41
-records tied at the boundary are retained.
-See [the current scoring policy](docs/zero_contribution_policy.md).
-The low-level exporter creates a staged package; delivery replaces the complete
-current result directory after validation. Successful temporary stages are removed.
-
-For the PlastIQ Dashboard, load `PlastIQ_results.csv` followed by
-`PlastIQ_dashboard.sqlite` from the same export. The full archive
-is for offline audit, not browser import. The display adapter preserves absent
-formal scores and uses the selected literature source. The scientific archive
-remains compact-v2; the separate publication and browser-detail contracts are
-version 1. Publication field selection is defined in
-`plastprior/publication_fields.json`, without rescoring or source enrichment.
-
-## Scope and limitations
-
-- The supported reproduction starts from specified frozen inputs. VEGA
-  prediction generation, live database queries and some upstream production/
-  market transformations are outside this workflow.
-- Fifteen model-identity exceptions remain unresolved. Their QSAR and Pov/LRTP
-  evidence is isolated; independent eligible evidence and source links remain.
-- GIC name/identifier and metadata limitations remain visible. Associations
-  are not confirmed identities or current regulatory determinations.
-- Missing components contribute zero only in sums. Partial evidence remains
-  rankable and visibly marked; zero-contribution or low-priority records do not
-  establish low risk or safety.
-- Scores are screening indicators. Agreement with historical computations
-  does not independently validate the weights, thresholds, proxies or models.
-- Direct dependencies are pinned, but the transitive environment is not fully
-  locked. Native Windows launchers and CI are provided; a passing CI run and a
-  fresh full-data Windows run are still required to confirm portability.
-- Source-access, citation and distribution decisions remain open. `LICENSE`,
-  `CITATION.cff` and a versioned public research archive have not been established.
-
-The [source register](docs/data_access_register.json) distinguishes recorded
-metadata from unresolved provenance. The [workbook comparison](docs/workbook_comparison.md)
-documents equivalent scientific tables in four checked pairs without treating
-their different file hashes as interchangeable.
-
-## Development and verification
-
-The scientific implementation is in `plastprior/`; `main.py` and the root
-Notebook provide interfaces. Source tests are retained in `tests/`.
-Technical details for existing integrations and older datasets are documented
-in the [compatibility guide](docs/branding.md).
-
-```text
+```sh
 python -m unittest discover -s tests -v
 ```
 
-These tests use local fixtures and do not require the research collection.
-They do not replace a full frozen-input run. Exact field comparisons, input
-fingerprints, execution records and the separate historical regression scope
-are described in the [reproduction guide](docs/reproduction.md#verification).
+These tests exercise scoring boundaries, evidence handling and export behaviour
+without requiring the research input collection. They do not establish complete
+reproduction or successful installation on every platform.
 
-### Dashboard Level 1 composition evidence
+For a reproduced dataset, compare records by full InChIKey, including component
+scores, domain totals, ranks, ties, priority levels and missingness. Verify the
+CSV–Dashboard database pairing, source fingerprints and figure-data provenance.
+The [verification guide](docs/reproduction.md#verification) distinguishes
+scientific-value comparisons from byte-level file checks. Independently generated
+SQLite files may have different hashes because of run metadata, even when their
+scientific contents agree.
 
-The composition is now manuscript Extended Data Fig. 4; `Fig4` remains its stable internal
-data and database identifier (see `FigureCode/publication_order.json`).
-The browser projection automatically includes verified composition evidence when
-`result/figure_data/Fig4/` has prepared annotations for the exact exported CSV.
-All 101 baseline members, source hashes, labels, category order and three count
-tables travel in `publication_figures` alongside other figures. Preparing internal `Fig4`
-also refreshes the paired dashboard database in the coordinated result swap.
-New datasets must have matching composition annotations prepared first; stale article
-annotations are never silently reused. No scoring or ranking is changed.
+## Documentation
 
-To package existing prepared data without recalculating or rendering figures:
+| Topic | Reference |
+| --- | --- |
+| Evidence integration and analysis stages | [Methods](docs/methods.md) |
+| Current PBMT and exposure rules | [Scoring specification](docs/pbmt_three_level_scoring.md) |
+| Input snapshots and required file layout | [Data preparation](docs/data_preparation.md) |
+| Environment, execution and comparison procedures | [Reproduction and verification](docs/reproduction.md) |
+| Result storage and database contents | [Result layout](docs/results_layout.md) |
+| Compound evidence and Dashboard packaging | [Evidence delivery](docs/evidence_delivery.md) |
+| Publication figure implementations | [Main and extended figures](FigureCode/INDEX.md), [supplementary material](FigureCode/SI_INDEX.md) |
+| Existing integrations and older data formats | [Compatibility](docs/branding.md) |
 
-```sh
-.venv/bin/python -m plastprior.figure_evidence result
-```
+Technical documents include explicitly identified historical baselines and
+validation records. Their counts and policies apply to the named versions;
+they should not be substituted for the selected current analysis.
 
-Users then import the original `PlastIQ_results.csv` and
-`PlastIQ_dashboard.sqlite` normally; no separate figure file is required.
+## Citation and licensing
+
+When reporting analyses performed with PlastIQ, identify the code commit, data
+version and scoring configuration used, and cite the original evidence sources.
+Formal manuscript and archived-software citation details have not yet been added
+to this repository.
+
+PlastIQ source code is released under the [MIT License](LICENSE),
+Copyright (c) 2026 The University of Melbourne. The PlastIQ Dashboard is a
+publicly accessible web interface and is not part of this source release.
+Third-party software and source datasets retain their respective terms and
+attribution requirements; see the [source documentation](docs/data_distribution_checklist.md).
+
+## Contact
+
+PlastIQ is maintained under the
+[ALECUnimelb](https://github.com/ALECUnimelb) account.
+For research and data enquiries, contact
+[ALEC-Chemistry@unimelb.edu.au](mailto:ALEC-Chemistry@unimelb.edu.au).
+Report software issues through the
+[repository issue tracker](https://github.com/ALECUnimelb/PlastIQ/issues).
